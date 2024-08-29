@@ -1,15 +1,24 @@
 <!-- Messenger Chat Plugin Code -->
-    <div id="fb-root"></div><div id="chat" class="zetachat"></div><script>
-      var chatbox = document.getElementById('fb-customer-chat');
+    <div id="fb-root"></div>
+
+    <div id="fb-customer-chat" class="chat"></div>
+    
+    <script>
+      var chatbox = document.getElementById('zeta-chat');
       chatbox.setAttribute("405970549066637", "405970549066637");
-      chatbox.setAttribute("attribution", "biz_inbox");
-    </script><script>
+      chatbox.setAttribute("attribution", "message_inbox");
+    </script>
+
+
+    <script>
       window.fbAsyncInit = function() {
         FB.init({
           xfbml            : true,
           version          : '2'
         });
-      };(function(d, s, id) {
+      };
+
+      (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
         js = d.createElement(s); js.id = id;
