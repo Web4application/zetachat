@@ -5,7 +5,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: zetachat    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: 'zetachat.app'      # set this to the path to your web app project, defaults to the repository roo
+  AZURE_WEBAPP_PACKAGE_PATH: 'https://web4application.github.io/kubu-hai.model.h5'      # set this to the path to your web app project, defaults to the repository roo
   NODE_VERSION: '20.2'                # set this to the node version to use
 
 permissions:
