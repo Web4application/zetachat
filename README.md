@@ -1,0 +1,1 @@
+[![Deploy Jekyll with GitHub Pages dependencies preinstalled](https://github.com/Web4application/zetachat/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Web4application/zetachat/actions/workflows/jekyll-gh-pages.yml)
