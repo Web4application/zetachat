@@ -1,0 +1,28 @@
+{
+  "name": "zetachat",
+  "version": "1.0.0",
+  "description": "Zetachat is a chat application with AI-powered features and social connectivity.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "client": "react-scripts start",
+    "server": "node server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "openai": "^3.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "author": "kubu lee",
+  "license": "MIT"
+}
