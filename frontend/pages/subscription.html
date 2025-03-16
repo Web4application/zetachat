@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zetachat Subscription</title>
+  <link rel="stylesheet" href="../styles/style.css"> <!-- Link to your CSS -->
+  <script src="../scripts/subscriptionCheck.js" defer></script> <!-- Link to subscription script -->
+</head>
+<body>
+  <header>
+    <h1>Zetachat</h1>
+    <p>Your ultimate chat platform.</p>
+  </header>
+
+  <!-- Trial and Subscription Section -->
+  <section id="subscription-section">
+    <div id="trial-message">
+      <h2>Welcome to Zetachat!</h2>
+      <p>Your 7-day free trial is active. Enjoy full access until <span id="trial-end"></span>.</p>
+      <p>After your trial, you’ll need to subscribe to continue using Zetachat.</p>
+    </div>
+
+    <div id="subscription-plans" style="display: none;">
+      <h2>Subscribe Now</h2>
+      <ul>
+        <li>Monthly Plan: <strong>$30</strong></li>
+        <li>Yearly Plan: <strong>$300</strong> (Save $60 with this plan!)</li>
+      </ul>
+      <h3>Bitcoin Payment Instructions:</h3>
+      <p>Send the payment to the following Bitcoin wallet:</p>
+      <p><strong id="bitcoin-wallet">your-bitcoin-wallet-address</strong></p>
+      <p>Once the payment is confirmed, your subscription will be activated.</p>
+    </div>
+  </section>
+
+  <!-- Restricted Content Section -->
+  <section id="restricted-content" style="display: none;">
+    <h2>Welcome Back!</h2>
+    <p>You are a subscribed member. Enjoy all premium Zetachat features!</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Zetachat. All rights reserved.</p>
+  </footer>
+</body>
+</html>
