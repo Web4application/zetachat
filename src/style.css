@@ -1,0 +1,78 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: navy; /* Navy blue background for the page */
+  color: #ffffff; /* White text for good contrast */
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1877f2; /* Facebook-inspired blue */
+  color: white;
+  padding: 10px 20px;
+}
+
+.navbar .logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.search-bar {
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
+  width: 300px;
+}
+
+.nav-icons button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.nav-icons button:hover {
+  text-decoration: underline;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.sidebar {
+  background-color: darkpink; /* Dark pink background for the sidebar */
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  color: white;
+}
+
+.feed {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 400px;
+}
+
+.contacts {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: #f0f2f5;
+  color: #555;
+}
