@@ -1,0 +1,15 @@
+/* Default styles for desktop */
+.chat-container {
+    display: flex;
+    flex-direction: row;
+    width: 80%;
+    margin: auto;
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+        width: 100%;
+    }
+}
