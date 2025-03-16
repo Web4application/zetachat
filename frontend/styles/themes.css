@@ -1,0 +1,11 @@
+:root {
+    --primary-color: #4CAF50; /* Default green theme */
+}
+
+.theme-blue {
+    --primary-color: #2196F3;
+}
+
+body {
+    background-color: var(--primary-color);
+}
