@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ZetaChat - Connect and share with your friends" />
+  <title>ZetaChat</title>
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Navigation bar -->
+  <nav class="navbar" role="navigation">
+    <div class="logo">ZetaChat</div>
+    <input type="text" class="search-bar" placeholder="Search ZetaChat" aria-label="Search ZetaChat" />
+    <div class="nav-icons">
+      <button>Home</button>
+      <button>Profile</button>
+      <button>Messages</button>
+    </div>
+  </nav>
+  
+  <main class="content">
+    <!-- Sidebar -->
+    <aside class="sidebar" role="complementary">
+      <h3>Quick Links</h3>
+      <ul class="sidebar-links">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/settings">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Feed Section -->
+    <section class="feed" role="main">
+      <p>Loading your feed...</p> <!-- Placeholder text -->
+    </section>
+    
+    <!-- Contacts Section -->
+    <section class="contacts" role="region">
+      <h3>Contacts List</h3>
+      <!-- Contacts list content will go here -->
+    </section>
+  </main>
+  
+  <footer>
+    <p>ZetaChat ©️ 2025 | <a href="/privacy-policy">Privacy Policy</a> | <a href="/contact">Contact Us</a></p>
+  </footer>
+  
+  <!-- Include the script -->
+  <script src="../scripts/loadFeed.js" defer></script>
+</body>
+</html>
