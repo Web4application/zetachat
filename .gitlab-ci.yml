@@ -1,0 +1,21 @@
+# Use the latest stable LTS Node.js image
+image: node:18
+
+# Pre-build steps to install dependencies
+before_script:
+  - npm ci  # Faster and more reliable than `npm install`
+
+pages:
+  script:
+    # Build and deploy steps
+    - npm run build
+    - npm run deploy
+    # Notify via Discord when deployment completes
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"Deployment complete!\"}" $DISCORD_WEBHOOK_URL'
+  artifacts:
+    paths:
+      # The folder that contains files for the pages deployment
+      - public
+  rules:
+    # Ensures deployment only occurs on pushes to the default branch
+    - if: '$CI_COMMIT_REF_NAME == "main"'
