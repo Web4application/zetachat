@@ -1,0 +1,72 @@
+/* styles.css */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: navy; /* Navy blue background color */
+  color: white; /* White text for better contrast */
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #001f3f; /* Darker navy shade for the navbar */
+  color: white;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.nav-links li a:hover {
+  color: #ffcc00; /* Highlight effect on hover */
+}
+
+h1, h2, h3 {
+  text-align: center;
+  color: white;
+}
+
+button {
+  background-color: #004080; /* Slightly lighter navy for buttons */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0059b3; /* Lighter shade on hover */
+}
+
+form input, form select {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+form input:focus, form select:focus {
+  outline: none;
+  border: 1px solid #0059b3; /* Highlight input fields on focus */
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  background-color: #001f3f; /* Same as navbar for consistency */
+  color: white;
+}
