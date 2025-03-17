@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ZetaChat - Connect and share with your friends" />
+  <title>ZetaChat</title>
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Navigation bar -->
+  <nav class="navbar" role="navigation">
+    <div class="logo">ZetaChat</div>
+    <input type="text" class="search-bar" placeholder="Search ZetaChat" aria-label="Search ZetaChat" />
+    <div class="nav-icons">
+      <button>Home</button>
+      <button>Profile</button>
+      <button>Messages</button>
+    </div>
+  </nav>
+  
+  <main class="content">
+    <!-- Login Section -->
+    <section class="login" role="form">
+      <h2>Login to ZetaChat</h2>
+      <form action="/login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required />
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required />
+        
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="/signup">Sign up here</a>.</p>
+    </section>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" role="complementary">
+      <h3>Quick Links</h3>
+      <ul class="sidebar-links">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/settings">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Feed Section -->
+    <section class="feed" role="main">
+      <p>Loading your feed...</p> <!-- Placeholder text -->
+    </section>
+    
+    <!-- Contacts Section -->
+    <section class="contacts" role="region">
+      <h3>Contacts List</h3>
+      <!-- Contacts list content will go here -->
+    </section>
+  </main>
+  
+  <footer>
+    <p>ZetaChat ©️ 2025 | <a href="/privacy-policy">Privacy Policy</a> | <a href="/contact">Contact Us</a></p>
+  </footer>
+  
+  <!-- StartAdam Chat Widget -->
+  <iframe
+    sandbox="allow-scripts allow-same-origin allow-popups allow-downloads allow-top-navigation allow-top-navigation-by-user-activation"
+    style="right: 0; position: fixed; bottom: 0; display: flex; align-self: flex-end; background-color: transparent; border-width: 0px; colorScheme: light;"
+    id="adam-chat"
+    title="chat live"
+    src="https://app.startadam.com/adam-prd/adam-livechat-widget/index.html?channelKey=3G1SMG8SUG27I42Q2QF&integrationInteface=https://app.startadam.com/adam-prd/adam-integration-interface-prd&companyName=Web4app&transparent=0&linkChat=https://a.link/web4app&initialMessage=&imageUrl=&agentName=&userIcon="
+  ></iframe>
+  
+  <!-- Include the script -->
+  <script src="../scripts/loadFeed.js" defer></script>
+</body>
+</html>
