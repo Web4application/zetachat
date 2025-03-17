@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ZetaChat - Connect and Communicate Everywhere">
+  <title>ZetaChat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Main Navigation -->
+  <nav class="navbar" role="navigation">
+    <div class="logo">ZetaChat</div>
+    <div class="nav-icons">
+      <button>Home</button>
+      <button>Profile</button>
+      <button>Messages</button>
+    </div>
+  </nav>
+
+  <!-- Social Media Links -->
+  <nav class="social-media-nav">
+    <h3>Connect with Social Platforms:</h3>
+    <ul class="social-media-list">
+      <li><a href="https://wa.me" target="_blank">WhatsApp</a></li>
+      <li><a href="https://twitter.com" target="_blank">Twitter</a></li>
+      <li><a href="https://www.instagram.com" target="_blank">Instagram</a></li>
+      <li><a href="https://www.facebook.com" target="_blank">Facebook</a></li>
+      <li><a href="https://discord.com" target="_blank">Discord</a></li>
+      <li><a href="https://telegram.org" target="_blank">Telegram</a></li>
+    </ul>
+  </nav>
+
+  <!-- User Profile -->
+  <section id="profile-section">
+    <h2>Manage Your Profile</h2>
+    <div class="profile-picture">
+      <img id="profile-img" src="default-profile.png" alt="Profile Picture">
+      <form id="profile-pic-form" enctype="multipart/form-data">
+        <label for="profile-pic">Update Profile Picture:</label>
+        <input type="file" id="profile-pic" accept="image/*">
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Create Post -->
+  <section id="create-post">
+    <h2>Create a Post</h2>
+    <form id="postForm" enctype="multipart/form-data">
+      <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
+      <label for="post-image">Attach Image/Video:</label>
+      <input type="file" id="post-image" name="postMedia" accept="image/*, video/*">
+      <button type="submit">Post</button>
+    </form>
+  </section>
+
+  <!-- Messaging Section -->
+  <section id="messaging-section">
+    <h2>Messaging Center</h2>
+    <p>Chat with your friends across platforms:</p>
+    <div id="chat-window">
+      <!-- Chat messages will load dynamically here -->
+    </div>
+    <form id="sendMessageForm">
+      <input type="text" id="chat-input" placeholder="Type a message">
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+  <!-- Feed Section -->
+  <section id="feed">
+    <h2>Your Feed</h2>
+    <div class="post">
+      <h3>John Doe</h3>
+      <p>Check out my latest adventure!</p>
+      <img src="example-post.jpg" alt="Post Media">
+      <div class="reactions">
+        <button>👍 Like</button>
+        <button>❤️ Love</button>
+        <button>😮 Wow</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>ZetaChat ©️ 2025 | <a href="/privacy-policy">Privacy Policy</a> | <a href="/contact">Contact</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Profile Picture Upload
+    document.getElementById("profile-pic-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("profilePicture", document.getElementById("profile-pic").files[0]);
+      console.log("Profile picture uploaded!"); // Placeholder
+    });
+
+    // New Post Submission
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("content", document.getElementById("post-content").value);
+      formData.append("postMedia", document.getElementById("post-image").files[0]);
+      console.log("Post created and synchronized!"); // Placeholder
+    });
+
+    // Messaging Form Submission
+    document.getElementById("sendMessageForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const message = document.getElementById("chat-input").value;
+      console.log("Message sent:", message); // Placeholder
+      document.getElementById("chat-input").value = ""; // Clear input
+    });
+  </script>
+</body>
+</html>
