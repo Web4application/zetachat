@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ZetaChat - Connect and share with your friends" />
+  <title>ZetaChat</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Main Navigation Bar -->
+  <nav class="navbar" role="navigation">
+    <div class="logo">ZetaChat</div>
+    <div class="nav-icons">
+      <button>Home</button>
+      <button>Profile</button>
+      <button>Messages</button>
+    </div>
+  </nav>
+
+  <!-- Social Media Navigation Bar -->
+  <nav class="social-media-nav">
+    <h3>Connect with Friends on:</h3>
+    <ul class="social-media-list">
+      <li><a href="https://wa.me" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+      <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a></li>
+      <li><a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+      <li><a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+      <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer">Discord</a></li>
+      <li><a href="https://telegram.org" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+    </ul>
+  </nav>
+
+  <main class="content">
+    <!-- Profile Section -->
+    <section id="profile-section">
+      <h2>Profile</h2>
+      <div class="profile-picture">
+        <img id="profile-img" src="default-profile.png" alt="Profile Picture" />
+        <form id="profile-pic-form" enctype="multipart/form-data">
+          <label for="profile-pic">Upload Profile Picture:</label>
+          <input type="file" id="profile-pic" name="profilePicture" accept="image/*" />
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Create Post Section -->
+    <section id="create-post">
+      <h2>Create a Post</h2>
+      <form id="postForm" enctype="multipart/form-data">
+        <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
+        <label for="post-image">Attach Image/Video:</label>
+        <input type="file" id="post-image" name="postMedia" accept="image/*,video/*" />
+        <button type="submit">Post</button>
+      </form>
+    </section>
+
+    <!-- Stories/Events/Status -->
+    <section id="user-activities">
+      <h2>Your Stories, Events & Status</h2>
+      <form id="activityForm">
+        <textarea id="activity-content" placeholder="Share a story, event, or status" required></textarea>
+        <label for="activity-media">Attach Image/Video:</label>
+        <input type="file" id="activity-media" name="activityMedia" accept="image/*,video/*" />
+        <button type="submit">Post Activity</button>
+      </form>
+    </section>
+
+    <!-- Feed Section -->
+    <section id="feed">
+      <h2>Feed</h2>
+      <!-- Example Post -->
+      <div class="post">
+        <h3>User's Post</h3>
+        <p id="post-text">This is an example post. Users can share thoughts, stories, or updates here!</p>
+        <img src="example-post.jpg" alt="Post Media" class="post-media" />
+        <div class="reactions">
+          <button class="reaction" data-reaction="like">👍 Like</button>
+          <button class="reaction" data-reaction="love">❤️ Love</button>
+          <button class="reaction" data-reaction="wow">😮 Wow</button>
+        </div>
+        <form class="comment-form">
+          <input type="text" class="comment-input" placeholder="Write a comment..." />
+          <button type="submit">Post Comment</button>
+        </form>
+        <ul class="comments">
+          <li>User1: Amazing post!</li>
+          <li>User2: Love this!</li>
+        </ul>
+        <div class="share-options">
+          <button class="repost">🔄 Repost</button>
+          <button class="share">📤 Share</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ZetaChat ©️ 2025 | <a href="/privacy-policy">Privacy Policy</a> | <a href="/contact">Contact Us</a></p>
+  </footer>
+
+  <!-- StartAdam Chat Widget -->
+  <iframe
+    sandbox="allow-scripts allow-same-origin allow-popups allow-downloads allow-top-navigation allow-top-navigation-by-user-activation"
+    style="right: 0; position: fixed; bottom: 0; display: flex; align-self: flex-end; background-color: transparent; border-width: 0px; colorScheme: light;"
+    id="adam-chat"
+    title="chat live"
+    src="https://app.startadam.com/adam-prd/adam-livechat-widget/index.html?channelKey=3G1SMG8SUG27I42Q2QF&integrationInteface=https://app.startadam.com/adam-prd/adam-integration-interface-prd&companyName=Web4app&transparent=0&linkChat=https://a.link/web4app&initialMessage=&imageUrl=&agentName=&userIcon="
+  ></iframe>
+
+  <!-- JavaScript -->
+  <script>
+    // Handle Profile Picture Upload
+    document.getElementById("profile-pic-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("profilePicture", document.getElementById("profile-pic").files[0]);
+
+      const res = await fetch("/uploadProfilePicture", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        alert("Profile picture uploaded successfully!");
+        document.getElementById("profile-img").src = data.imageUrl;
+      } else {
+        alert("Failed to upload profile picture.");
+      }
+    });
+
+    // Handle New Post Submission
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("content", document.getElementById("post-content").value);
+      formData.append("postMedia", document.getElementById("post-image").files[0]);
+
+      const res = await fetch("/createPost", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        alert("Post created successfully!");
+      } else {
+        alert("Failed to create post.");
+      }
+    });
+
+    // Handle Reactions, Comments, and Share
+    document.querySelectorAll(".reaction").forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        const reaction = e.target.getAttribute("data-reaction");
+        alert(`You reacted with: ${reaction}`);
+      });
+    });
+
+    document.querySelectorAll(".comment-form").forEach((form) => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = e.target.querySelector(".comment-input");
+        alert(`Comment posted: ${input.value}`);
+        input.value = "";
+      });
+    });
+
+    document.querySelectorAll(".repost").forEach((button) => {
+      button.addEventListener("click", () => {
+        alert("Post reposted to your timeline!");
+      });
+    });
+
+    document.querySelectorAll(".share").forEach((button) => {
+      button.addEventListener("click", () => {
+        alert("Post shared successfully!");
+      });
+    });
+  </script>
+</body>
+</html>
