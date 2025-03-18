@@ -1,6 +1,6 @@
 ## ZetaChat
 
-ZetaChat is a comprehensive web application designed to facilitate seamless communication and collaboration. Leveraging a robust mix of front-end and back-end technologies, ZetaChat aims to provide a reliable and user-friendly chat platform.
+ZetaChat is a comprehensive web application designed to facilitate seamless communication and collaboration. Leveraging a robust mix of front-end and back-end technologies, ZetaChat aims to provide...
 
 ## Technologies Used
 
@@ -23,25 +23,25 @@ ZetaChat is a comprehensive web application designed to facilitate seamless comm
 To get started with the development or deployment of ZetaChat, follow these steps:
 
 1. **Clone the Repository**
-   ```sh
-   git clone https://github.com/Web4application/zetachat.git
-   ```
+    ```sh
+    git clone https://github.com/Web4application/zetachat.git
+    ```
 
 2. **Install Dependencies**
-   Navigate to the project directory and install the necessary dependencies.
-   ```sh
-   cd zetachat
-   npm install
-   ```
+    Navigate to the project directory and install the necessary dependencies.
+    ```sh
+    cd zetachat
+    npm install
+    ```
 
 3. **Run the Application**
-   Start the development server.
-   ```sh
-   npm start
-   ```
+    Start the development server.
+    ```sh
+    npm start
+    ```
 
 4. **Access the Application**
-   Open your web browser and go to `http://localhost:3000` to view the application.
+    Open your web browser and go to `http://localhost:3000` to view the application.
 
 ## Contributing
 
@@ -55,5 +55,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 kubulee.kl@gmail.com
 For any questions or suggestions, feel free to open an issue or contact the repository owner.
-```
-
