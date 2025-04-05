@@ -1,74 +1,95 @@
-// Import required modules
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 
-// Connect to the chat server
-const socket = io('https://ovlusvvwyducpspqbfxn.supabase.co'); // Replace with your server URL
+function App() {
+  const [todos, setTodos] = useState([]);
+  const [input, setInput] = useState('');
+  const [filter, setFilter] = useState('all');
 
-const App = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [username, setUsername] = useState('');
-
+  // Load saved todos from localStorage
   useEffect(() => {
-    // Listen for incoming messages
-    socket.on('message', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    return () => {
-      socket.off('message');
-    };
+    const savedTodos = JSON.parse(localStorage.getItem('todos')) || [];
+    setTodos(savedTodos);
   }, []);
 
-  const sendMessage = () => {
-    if (inputMessage.trim() !== '') {
-      const messageData = {
-        user: username || 'Anonymous',
-        text: inputMessage,
-        time: new Date().toLocaleTimeString(),
-      };
-      socket.emit('message', messageData); // Send message to server
-      setInputMessage(''); // Clear input field
+  // Save todos to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
+  // Add a new todo
+  const addTodo = () => {
+    if (input.trim()) {
+      setTodos([...todos, { id: Date.now(), text: input, completed: false, deadline: '' }]);
+      setInput('');
     }
   };
 
+  // Toggle completion status
+  const toggleComplete = (id) => {
+    setTodos(todos.map(todo => (
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    )));
+  };
+
+  // Delete a todo
+  const deleteTodo = (id) => {
+    setTodos(todos.filter(todo => todo.id !== id));
+  };
+
+  // Filter todos based on user selection
+  const filteredTodos = todos.filter(todo =>
+    filter === 'completed' ? todo.completed :
+    filter === 'pending' ? !todo.completed :
+    true
+  );
+
+  // Sort todos by deadline (if added in the future)
+  const sortedTodos = [...filteredTodos].sort((a, b) => {
+    if (!a.deadline || !b.deadline) return 0;
+    return new Date(a.deadline) - new Date(b.deadline);
+  });
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>Zetachat</h1>
+      <h1>Enhanced To-Do List</h1>
 
-      {!username ? (
-        <div>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <button onClick={() => setUsername(username)}>Join Chat</button>
-        </div>
-      ) : (
-        <div>
-          <div style={{ border: '1px solid #ccc', padding: '10px', height: '300px', overflowY: 'scroll' }}>
-            {messages.map((msg, index) => (
-              <div key={index}>
-                <strong>{msg.user}: </strong>
-                {msg.text} <small style={{ color: '#888' }}>({msg.time})</small>
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: '10px' }}>
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type a message"
-            />
-            <button onClick={sendMessage}>Send</button>
-          </div>
-        </div>
-      )}
+      {/* Input for adding new todos */}
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Add a task..."
+        style={{ marginRight: '10px' }}
+      />
+      <button onClick={addTodo} style={{ padding: '5px 10px', background: 'blue', color: 'white', border: 'none' }}>
+        Add Task
+      </button>
+
+      {/* Filter options */}
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={() => setFilter('all')} style={{ marginRight: '5px' }}>All</button>
+        <button onClick={() => setFilter('completed')} style={{ marginRight: '5px' }}>Completed</button>
+        <button onClick={() => setFilter('pending')}>Pending</button>
+      </div>
+
+      {/* Todo list */}
+      <ul style={{ listStyleType: 'none', padding: '0', marginTop: '20px' }}>
+        {sortedTodos.map(todo => (
+          <li key={todo.id} style={{ marginBottom: '10px' }}>
+            <span style={{
+              textDecoration: todo.completed ? 'line-through' : 'none',
+              marginRight: '10px'
+            }}>
+              {todo.text}
+            </span>
+            <button onClick={() => toggleComplete(todo.id)} style={{ marginRight: '5px' }}>✓</button>
+            <button onClick={() => deleteTodo(todo.id)} style={{ color: 'red' }}>🗑️</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-};
+}
 
 export default App;
+
