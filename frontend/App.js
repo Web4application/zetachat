@@ -7,19 +7,20 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } f
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "18caf9190243a8d2ef0b11cfe8eee2c1bfaa879a",
+  authDomain: "https://accounts.google.com/o/oauth2/auth",
+  projectId: "web4-86e33",
+  storageBucket: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-mtmhu%40web4-86e33.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com",
+  messagingSenderId: "firebase-adminsdk-mtmhu@web4-86e33.iam.gserviceaccount.com",
+  appId: "107703919928499811271",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Connect to the chat server
-const socket = io('https://your-server-url'); // Replace with your backend server URL
+const socket = io('https://ovlusvvwyducpspqbfxn.supabase.co'); // Replace with your backend server URL
 
 const App = () => {
   const [messages, setMessages] = useState([]);
