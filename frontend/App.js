@@ -7,13 +7,13 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } f
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "18caf9190243a8d2ef0b11cfe8eee2c1bfaa879a",
-  authDomain: "https://accounts.google.com/o/oauth2/auth",
-  projectId: "web4-86e33",
-  storageBucket: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-mtmhu%40web4-86e33.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com",
-  messagingSenderId: "firebase-adminsdk-mtmhu@web4-86e33.iam.gserviceaccount.com",
-  appId: "107703919928499811271",
+  apiKey:"AlzaSyC83sBVfbMgcwKilnIEsBzrBXJX5DN4GAM",
+authDomain: "web4-86e33.firebaseapp.com",
+projectId: "web4-86e33",
+storageBucket: "web4-86e33.appspot.com",
+messagingSenderId: "641940543035",
+appId: "1:641940543035:web:b02c6ed23af36dc7dleele",
+measurementId: "G-Q2BPGEX83M"
 };
 
 const app = initializeApp(firebaseConfig);
