@@ -25,7 +25,7 @@ export const validateMessage = (message) => {
 
 // Configuration for server connection
 export const serverConfig = {
-  url: 'https://your-server-url', // Replace with your server URL
+  url: 'http://web4-86e33.firebaseapp.com', // Replace with your server URL
   reconnectInterval: 5000, // Time in ms to attempt reconnection
 };
 
