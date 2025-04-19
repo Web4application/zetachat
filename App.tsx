@@ -1,41 +1,28 @@
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList } from 'react-native';
-import { supabase } from '../utils/supabase';
+import { useState, useEffect } from 'react'
+import { supabase } from '../utils/supabase'
 
-export default function App() {
-  const [todos, setTodos] = useState([]);
+function Page() {
+  const [todos, setTodos] = useState([])
 
   useEffect(() => {
-    const getTodos = async () => {
-      try {
-        const { data: todos, error } = await supabase.from('todos').select();
+    function getTodos() {
+      const { data: todos } = await supabase.from('todos').select()
 
-        if (error) {
-          console.error('Error fetching todos:', error.message);
-          return;
-        }
-
-        if (todos && todos.length > 0) {
-          setTodos(todos);
-        }
-      } catch (error) {
-        console.error('Error fetching todos:', error.message);
+      if (todos.length > 1) {
+        setTodos(todos)
       }
-    };
+    }
 
-    getTodos();
-  }, []);
+    getTodos()
+  }, [])
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Todo List</Text>
-      <FlatList
-        data={todos}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text key={item.id}>{item.title}</Text>}
-      />
-    </View>
-  );
-};
-
+    <div>
+      {todos.map((todo) => (
+        <li key={todo}>{todo}</li>
+      ))}
+    </div>
+  )
+}
+export default Page
