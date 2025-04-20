@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ZetaChat - Seamless Communication Platform">
+  <title>ZetaChat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">ZetaChat</div>
+      <ul class="nav-links" id="nav-links">
+        <li id="signup-nav"><a href="#signup-page">Sign-Up</a></li>
+        <li id="login-nav"><a href="#login-page">Login</a></li>
+        <li id="logout-nav" style="display: none;"><button id="logout-btn">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Login Page -->
+    <section id="login-page">
+      <h1>Login to ZetaChat</h1>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+    </section>
+
+    <!-- Sign-Up Page -->
+    <section id="signup-page" style="display: none;">
+      <h1>Sign Up for ZetaChat</h1>
+      <form id="signup-form">
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <button type="submit">Sign Up</button>
+      </form>
+    </section>
+
+    <!-- Subscription Page -->
+    <section id="subscription-page" style="display: none;">
+      <h1>Subscription Plans</h1>
+      <div>
+        <button id="subscribe-monthly">Subscribe Monthly - $30</button>
+        <button id="subscribe-yearly">Subscribe Yearly - $300</button>
+      </div>
+    </section>
+
+    <!-- Chat Page -->
+    <section id="chat-page" style="display: none;">
+      <h1>AI Chat</h1>
+      <div id="chat-container">
+        <div id="chat-messages"></div>
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="Type your message..." required>
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ZetaChat ©️ 2025</p>
+  </footer>
+
+  <script>
+    const backendUrl = 'https://ovlusvvwyducpspqbfxn.supabase.co';
+
+    // Handle Login
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      fetch(`${backendUrl}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            alert('Login successful!');
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('chat-page').style.display = 'block';
+          } else {
+            alert('Invalid login credentials.');
+          }
+        });
+    });
+
+    // Handle Chat Submission
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const userMessage = document.getElementById('chat-input').value;
+      fetch(`${backendUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const messageContainer = document.getElementById('chat-messages');
+          const userDiv = document.createElement('div');
+          userDiv.textContent = `You: ${userMessage}`;
+          const botDiv = document.createElement('div');
+          botDiv.textContent = `AI: ${data.response}`;
+          messageContainer.appendChild(userDiv);
+          messageContainer.appendChild(botDiv);
+        });
+    });
+  </script>
+</body>
+</html>
