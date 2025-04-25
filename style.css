@@ -1,72 +1,78 @@
-/* styles.css */
-
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background-color: navy; /* Navy blue background color */
-  color: white; /* White text for better contrast */
+  margin: 0;
+  padding: 0;
+  background-color: navy; /* Navy blue background for the page */
+  color: #ffffff; /* White text for good contrast */
 }
 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background-color: #001f3f; /* Darker navy shade for the navbar */
+  background-color: #1877f2; /* Facebook-inspired blue */
   color: white;
+  padding: 10px 20px;
 }
 
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 15px;
-}
-
-.nav-links li a {
-  text-decoration: none;
-  color: white;
+.navbar .logo {
+  font-size: 24px;
   font-weight: bold;
 }
 
-.nav-links li a:hover {
-  color: #ffcc00; /* Highlight effect on hover */
-}
-
-h1, h2, h3 {
-  text-align: center;
-  color: white;
-}
-
-button {
-  background-color: #004080; /* Slightly lighter navy for buttons */
-  color: white;
-  border: none;
-  padding: 10px 20px;
+.search-bar {
+  padding: 5px;
   border-radius: 5px;
+  border: none;
+  width: 300px;
+}
+
+.nav-icons button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  margin: 0 10px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #0059b3; /* Lighter shade on hover */
+.nav-icons button:hover {
+  text-decoration: underline;
 }
 
-form input, form select {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ccc;
+.content {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.sidebar {
+  background-color: darkpink; /* Dark pink background for the sidebar */
   border-radius: 5px;
-  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  color: white;
 }
 
-form input:focus, form select:focus {
-  outline: none;
-  border: 1px solid #0059b3; /* Highlight input fields on focus */
+.feed {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 400px;
+}
+
+.contacts {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
 footer {
   text-align: center;
-  padding: 15px;
-  background-color: #001f3f; /* Same as navbar for consistency */
-  color: white;
+  padding: 10px;
+  background: #f0f2f5;
+  color: #555;
 }
