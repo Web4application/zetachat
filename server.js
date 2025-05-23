@@ -1,42 +1,75 @@
-// server.js
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+// Load environment variables
 require('dotenv').config();
 
-const app = express();
-const server = http.createServer(app);
+const express = require('express');
+const bodyParser = require('body-parser');
+const { Configuration, OpenAIApi } = require('openai');
+const cors = require('cors');
 
-const io = new Server(server, {
-  cors: {
-    origin: '*', // Adjust to restrict origins in production
-    methods: ['GET', 'POST']
+// Initialize OpenAI API configuration
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+// Simulated database for demonstration
+let users = [
+  { email: 'user1@example.com', password: 'password123', subscription: false },
+];
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// User Login Endpoint
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = users.find((u) => u.email === email && u.password === password);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  res.json({ success: true, subscription: user.subscription });
+});
+
+// User Signup Endpoint
+app.post('/api/signup', (req, res) => {
+  const { email, password } = req.body;
+  if (users.find((u) => u.email === email)) {
+    return res.status(400).json({ error: 'User already exists' });
+  }
+
+  users.push({ email, password, subscription: false });
+  res.json({ success: true, message: 'Account created successfully' });
+});
+
+// Chatbot Integration Endpoint
+app.post('/api/chat', async (req, res) => {
+  const userMessage = req.body.message;
+  if (!userMessage) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  try {
+    const response = await openai.createChatCompletion({
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: 'You are a helpful and intelligent chatbot for ZetaChat.' },
+        { role: 'user', content: userMessage },
+      ],
+    });
+
+    const aiResponse = response.data.choices[0].message.content.trim();
+    res.json({ response: aiResponse });
+  } catch (error) {
+    console.error('OpenAI API Error:', error);
+    res.status(500).json({ error: 'Failed to process your request' });
   }
 });
 
-// Basic route just to confirm the server is running
-app.get('/', (req, res) => {
-  res.send('Real-time chat server is running.');
-});
-
-// Listen for new connections
-io.on('connection', (socket) => {
-  console.log('New user connected:', socket.id);
-
-  // Listen for incoming chat messages
-  socket.on('chat message', (msg) => {
-    console.log(`Message from ${socket.id}:`, msg);
-    // Broadcast the received message to all connected clients
-    io.emit('chat message', msg);
-  });
-
-  // Handle disconnections
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
+// Start the server
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

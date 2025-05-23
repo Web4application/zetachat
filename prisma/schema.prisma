@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("https://nyatadsfrhtbfxfnyldv.supabase.co")
+  directUrl = env("https://nesujs-q3rvvfx5r-web4apps.vercel.app")
 }
         
