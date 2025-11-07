@@ -187,7 +187,7 @@ def signup(username, password):
 # 🌐 App Layout
 # ======================================================
 st.set_page_config(page_title="Facebook Lite", layout="wide")
-st.title("📘 Facebook Lite (Discord Edition)")
+st.title ("ZETA CHAT")
 
 if st.session_state.current_user is None:
     st.subheader("Login or Signup")
