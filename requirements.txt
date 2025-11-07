@@ -1,0 +1,6 @@
+streamlit
+firebase-admin
+pyrebase4
+python-dotenv
+requests
+Pillow
