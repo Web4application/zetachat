@@ -1,215 +1,248 @@
 import streamlit as st
-import sqlite3
 import time
-from random import randint, choice
+from random import choice, randint
+import sqlite3
+import toml
+import os
 
-# ======================
-# 🎨 Modern Dark Theme CSS
-# ======================
-dark_style = """
-body { background-color:#121212; color:#e0e0e0; font-family:'Segoe UI',Roboto,sans-serif; }
-.stApp { background-color:#121212; }
-.stSidebar { background-color:#1f1f1f !important; }
-div.stButton>button { background-color:#4e5bdc; color:white; border-radius:6px; padding:0.5rem 1rem; }
-div.stButton>button:hover { background-color:#3a43a5; }
-.stTextInput>div>div>input, .stTextArea textarea { background-color:#1f1f1f; color:#e0e0e0; border-radius:6px; }
-.feed-card { background-color:#1f1f1f; border-radius:10px; padding:1rem; margin-bottom:1.5rem; }
-.comment-reply { background-color:#2a2a2a; border-left:3px solid #4e5bdc; padding:0.4rem 0.8rem; margin:0.3rem 0; border-radius:4px; }
-.comment-reply-2 { background-color:#333; border-left:3px solid #00ccff; margin-left:20px; padding:0.3rem 0.6rem; border-radius:4px; }
-.chat-bubble { background-color:#2a2a2a; padding:0.5rem; border-radius:12px; margin:3px 0; max-width:60%; }
-.chat-bubble.sender { background-color:#4e5bdc; color:white; margin-left:auto; }
-"""
-st.markdown(f"<style>{dark_style}</style>", unsafe_allow_html=True)
+# -------------------------------
+# Load config
+# -------------------------------
+CONFIG_FILE = "config.toml"
+if not os.path.exists(CONFIG_FILE):
+    st.error("Config file not found. Please create config.toml")
+    st.stop()
 
-# ======================
-# 🧠 SQLite Database
-# ======================
-conn = sqlite3.connect("zetachat.db", check_same_thread=False)
+config = toml.load(CONFIG_FILE)
+
+# -------------------------------
+# Database setup (SQLite for local)
+# -------------------------------
+DB_PATH = config['database']['path']
+conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 c = conn.cursor()
-# Users
-c.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, avatar TEXT, bio TEXT)""")
-# Posts
-c.execute("""CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, content TEXT, image TEXT, likes INTEGER, time TEXT)""")
-# Comments
-c.execute("""CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, user TEXT, content TEXT, parent INTEGER)""")
-# Messages
-c.execute("""CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, receiver TEXT, message TEXT, time TEXT)""")
-# Friends
-c.execute("""CREATE TABLE IF NOT EXISTS friends (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, friend TEXT)""")
-# Friend Requests
-c.execute("""CREATE TABLE IF NOT EXISTS friend_requests (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, receiver TEXT)""")
-# Notifications
-c.execute("""CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, message TEXT, time TEXT)""")
+
+# Users table
+c.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password TEXT,
+    avatar TEXT,
+    bio TEXT
+)
+''')
+
+# Messages table
+c.execute('''
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender TEXT,
+    receiver TEXT,
+    message TEXT,
+    timestamp TEXT
+)
+''')
+
+# Posts table
+c.execute('''
+CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user TEXT,
+    content TEXT,
+    image TEXT,
+    likes INTEGER,
+    comments TEXT,
+    shares INTEGER,
+    time TEXT
+)
+''')
 conn.commit()
 
-# ======================
-# 🔐 Session State
-# ======================
-if "current_user" not in st.session_state: st.session_state.current_user=None
+# -------------------------------
+# Mock initial users if empty
+# -------------------------------
+c.execute("SELECT COUNT(*) FROM users")
+if c.fetchone()[0] == 0:
+    users = [
+        ("admin", "password", "https://i.pravatar.cc/50?img=1", "Hello! I'm admin."),
+        ("user1", "1234", "https://i.pravatar.cc/50?img=2", "I am user1.")
+    ]
+    c.executemany("INSERT INTO users VALUES (?,?,?,?)", users)
+    conn.commit()
 
-# ======================
-# 🛠 Helper Functions
-# ======================
-def get_user(username):
-    c.execute("SELECT username, avatar, bio FROM users WHERE username=?", (username,))
-    r = c.fetchone()
-    return {"username": r[0], "avatar": r[1], "bio": r[2]} if r else {}
+# -------------------------------
+# Session state
+# -------------------------------
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
 
-def login_user(username, password):
+if "page" not in st.session_state:
+    st.session_state.page = "login"
+
+# -------------------------------
+# CSS (from config)
+# -------------------------------
+css = f"""
+body {{
+    background-color: {config['ui']['primary_color']};
+    color: #fff;
+    font-family: {config['ui']['font_family']};
+}}
+.stButton>button {{
+    background-color: {config['ui']['accent_color']};
+    color: white;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+}}
+.stButton>button:hover {{
+    background-color: {config['ui']['secondary_color']};
+}}
+.stTextInput>div>div>input, .stTextArea textarea {{
+    background-color: {config['ui']['secondary_color']};
+    color: white;
+    border-radius: 6px;
+}}
+.feed-card {{
+    background-color: {config['ui']['secondary_color']};
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}}
+.comment-reply {{
+    background-color: {config['ui']['primary_color']};
+    color: #ccc;
+    border-left: 3px solid {config['ui']['accent_color']};
+    padding: 0.3rem 0.6rem;
+    margin: 0.3rem 0;
+    border-radius: 4px;
+}}
+"""
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+# -------------------------------
+# Authentication functions
+# -------------------------------
+def login(username, password):
     c.execute("SELECT password FROM users WHERE username=?", (username,))
-    r = c.fetchone()
-    return r and r[0]==password
+    row = c.fetchone()
+    if row and row[0] == password:
+        st.session_state.current_user = username
+        st.session_state.page = "feed"
+        st.success(f"Welcome {username}")
+    else:
+        st.error("Invalid username or password")
 
-def signup_user(username, password):
-    c.execute("SELECT username FROM users WHERE username=?", (username,))
-    if c.fetchone(): return False
-    avatar = f"https://i.pravatar.cc/50?img={randint(1,70)}"
-    c.execute("INSERT INTO users (username,password,avatar,bio) VALUES (?,?,?,?)",(username,password,avatar,"New user bio"))
-    conn.commit()
-    return True
+def signup(username, password):
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    if c.fetchone():
+        st.error("Username already exists")
+    else:
+        avatar = f"https://i.pravatar.cc/50?img={randint(3,70)}"
+        bio = "New user bio"
+        c.execute("INSERT INTO users VALUES (?,?,?,?)", (username, password, avatar, bio))
+        conn.commit()
+        st.success("Account created! Please log in.")
 
-def create_post(user, content, image=""):
-    c.execute("INSERT INTO posts (user, content, image, likes, time) VALUES (?,?,?,?,?)",(user, content, image, 0, time.strftime("%Y-%m-%d %H:%M:%S")))
-    conn.commit()
+# -------------------------------
+# Sidebar navigation
+# -------------------------------
+if st.session_state.current_user:
+    st.sidebar.title("Navigation")
+    if config['features']['feed']:
+        if st.sidebar.button("Feed"):
+            st.session_state.page = "feed"
+    if config['features']['chat']:
+        if st.sidebar.button("Chat"):
+            st.session_state.page = "chat"
+    if config['features']['friends']:
+        if st.sidebar.button("Friends"):
+            st.session_state.page = "friends"
+    if config['features']['notifications']:
+        if st.sidebar.button("Notifications"):
+            st.session_state.page = "notifications"
+    if st.sidebar.button("Logout"):
+        st.session_state.current_user = None
+        st.session_state.page = "login"
+        st.experimental_rerun()
 
-def get_posts():
-    c.execute("SELECT id,user, content, image, likes, time FROM posts ORDER BY id DESC")
-    posts = []
-    for r in c.fetchall():
-        c.execute("SELECT user,content,parent FROM comments WHERE post_id=?",(r[0],))
-        comments = [{"user":cm[0],"content":cm[1],"parent":cm[2]} for cm in c.fetchall()]
-        posts.append({"id":r[0],"user":r[1],"content":r[2],"image":r[3],"likes":r[4],"time":r[5],"comments":comments})
-    return posts
+# -------------------------------
+# Pages
+# -------------------------------
+def page_login():
+    st.title(config['app']['name'])
+    st.subheader("Login or Signup")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text("Login")
+        login_user = st.text_input("Username", key="login_user")
+        login_pass = st.text_input("Password", type="password", key="login_pass")
+        if st.button("Login"):
+            login(login_user, login_pass)
+    with col2:
+        st.text("Signup")
+        signup_user = st.text_input("New Username", key="signup_user")
+        signup_pass = st.text_input("New Password", type="password", key="signup_pass")
+        if st.button("Signup"):
+            signup(signup_user, signup_pass)
 
-def add_comment(post_id,user,content,parent=None):
-    c.execute("INSERT INTO comments (post_id,user,content,parent) VALUES (?,?,?,?)",(post_id,user,content,parent))
-    conn.commit()
-
-def like_post(post_id):
-    c.execute("UPDATE posts SET likes = likes + 1 WHERE id=?",(post_id,))
-    conn.commit()
-
-def send_message(sender, receiver, message):
-    c.execute("INSERT INTO messages (sender, receiver, message, time) VALUES (?,?,?,?)",(sender, receiver, message, time.strftime("%Y-%m-%d %H:%M:%S")))
-    conn.commit()
-
-def get_messages(u1,u2):
-    c.execute("""SELECT sender,message,time FROM messages WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) ORDER BY id ASC""",(u1,u2,u2,u1))
-    return [{"sender":r[0],"message":r[1],"time":r[2]} for r in c.fetchall()]
-
-def add_notification(user, message):
-    c.execute("INSERT INTO notifications (user,message,time) VALUES (?,?,?)",(user,message,time.strftime("%Y-%m-%d %H:%M:%S")))
-    conn.commit()
-
-def get_notifications(user):
-    c.execute("SELECT message FROM notifications WHERE user=? ORDER BY id DESC",(user,))
-    return [r[0] for r in c.fetchall()]
-
-def add_friend(user, friend):
-    c.execute("INSERT INTO friends (user, friend) VALUES (?,?)",(user, friend))
-    conn.commit()
-
-def get_friends(user):
-    c.execute("SELECT friend FROM friends WHERE user=?",(user,))
-    return [r[0] for r in c.fetchall()]
-
-def send_friend_request(sender, receiver):
-    c.execute("INSERT INTO friend_requests (sender, receiver) VALUES (?,?)",(sender, receiver))
-    conn.commit()
-
-def get_friend_requests(user):
-    c.execute("SELECT sender FROM friend_requests WHERE receiver=?",(user,))
-    return [r[0] for r in c.fetchall()]
-
-def accept_friend_request(sender, receiver):
-    add_friend(sender, receiver)
-    add_friend(receiver, sender)
-    c.execute("DELETE FROM friend_requests WHERE sender=? AND receiver=?",(sender, receiver))
-    conn.commit()
-
-# ======================
-# 🌐 App Layout
-# ======================
-st.set_page_config(page_title="Zeta Chat", layout="wide")
-pages = ["Login","Feed","Chat","Friends","Notifications","Profile"]
-page_choice = st.sidebar.radio("Navigation", pages)
-
-# ======================
-# ---------- Login Page ----------
-# ======================
-if page_choice=="Login":
-    st.title("Zeta Chat")
-    st.subheader("Login")
-    login_user_input = st.text_input("Username")
-    login_pass_input = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if login_user(login_user_input, login_pass_input):
-            st.session_state.current_user = login_user_input
-            st.success("Logged in! Go to Feed.")
-        else: st.error("Invalid credentials")
-
-    st.subheader("Signup")
-    signup_user_input = st.text_input("New Username")
-    signup_pass_input = st.text_input("New Password", type="password")
-    if st.button("Signup"):
-        if signup_user(signup_user_input, signup_pass_input):
-            st.success("Account created! Please login.")
-        else: st.error("Username exists!")
-
-# ======================
-# ---------- Feed Page ----------
-# ======================
-elif page_choice=="Feed" and st.session_state.current_user:
-    st.header("Feed")
-    user = get_user(st.session_state.current_user)
-    post_content = st.text_area("What's on your mind?")
-    post_image = st.text_input("Image URL (optional)")
-    if st.button("Post"):
-        if post_content.strip()!="":
-            create_post(user["username"], post_content, post_image)
-            add_notification(user["username"], "You posted a new status!")
-            st.experimental_rerun()
-
-    for post in get_posts():
+def page_feed():
+    st.header("📰 News Feed")
+    c.execute("SELECT * FROM posts ORDER BY id DESC LIMIT ?", (config['features.feed']['max_posts_display'],))
+    posts = c.fetchall()
+    for post in posts:
         st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
-        st.write(f"**{post['user']}** • {post['time']}")
-        st.write(post["content"])
-        if post["image"]: st.image(post["image"])
-        col1,col2 = st.columns([1,2])
-        with col1:
-            if st.button(f"👍 Like {post['id']}"):
-                like_post(post['id'])
-                add_notification(post['user'], f"{st.session_state.current_user} liked your post")
-                st.experimental_rerun()
-        with col2:
-            comment_input = st.text_input(f"💬 Comment {post['id']}", key=f"comment_{post['id']}")
-            if st.button(f"Comment {post['id']}") and comment_input.strip():
-                add_comment(post['id'], st.session_state.current_user, comment_input)
-                add_notification(post['user'], f"{st.session_state.current_user} commented on your post")
-                st.experimental_rerun()
-
-        # Show threaded comments
-        for cm in post['comments']:
-            style = "comment-reply-2" if cm['parent'] else "comment-reply"
-            st.markdown(f"<div class='{style}'>{cm['user']}: {cm['content']}</div>", unsafe_allow_html=True)
+        st.markdown(f"**{post[1]}**")
+        st.write(post[2])
+        if post[3]:
+            st.image(post[3])
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("---")
-        time.sleep(0.05)
 
-# ======================
-# ---------- Chat Page ----------
-# ======================
-elif page_choice=="Chat" and st.session_state.current_user:
-    st.header("Chat")
-    users = [r[0] for r in c.execute("SELECT username FROM users").fetchall() if r[0]!=st.session_state.current_user]
-    chat_user = st.selectbox("Select user to chat", users)
-    message = st.text_input("Message")
-    if st.button("Send"):
-        if message.strip():
-            send_message(st.session_state.current_user, chat_user, message)
-            add_notification(chat_user, f"New message from {st.session_state.current_user}")
-            st.experimental_rerun()
-    st.subheader("Messages")
-    for m in get_messages(st.session_state.current_user, chat_user):
-        cls = "chat-bubble sender" if m["sender"]==st.session_state.current_user else "chat-bubble"
-        st.markdown(f"<div class='{cls}'>{m['sender']}: {m['message']}</div>", unsafe_allow_html=True)
+def page_chat():
+    st.header("💬 Chat")
+    c.execute("SELECT username FROM users WHERE username != ?", (st.session_state.current_user,))
+    other_users = [row[0] for row in c.fetchall()]
+    selected_user = st.selectbox("Select user to chat with", [""] + other_users)
+    if selected_user:
+        msg_input = st.text_input("Your message")
+        if st.button("Send"):
+            if msg_input.strip():
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                c.execute("INSERT INTO messages (sender, receiver, message, timestamp) VALUES (?,?,?,?)",
+                          (st.session_state.current_user, selected_user, msg_input, timestamp))
+                conn.commit()
+                st.success("Message sent!")
+
+        # Display conversation
+        c.execute("""
+        SELECT sender, message, timestamp FROM messages
+        WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?)
+        ORDER BY id ASC
+        """, (st.session_state.current_user, selected_user, selected_user, st.session_state.current_user))
+        conversation = c.fetchall()
+        for m in conversation:
+            align = "right" if m[0] == st.session_state.current_user else "left"
+            st.markdown(f"<div style='text-align:{align};'>{m[0]}: {m[1]} <small>{m[2]}</small></div>", unsafe_allow_html=True)
+
+def page_friends():
+    st.header("👥 Friends")
+    c.execute("SELECT username FROM users WHERE username != ?", (st.session_state.current_user,))
+    users_list = [row[0] for row in c.fetchall()]
+    st.write(users_list)
+
+def page_notifications():
+    st.header("🔔 Notifications")
+    st.info("No real notifications yet (can integrate later).")
+
+# -------------------------------
+# Render page
+# -------------------------------
+if st.session_state.page == "login":
+    page_login()
+elif st.session_state.page == "feed":
+    page_feed()
+elif st.session_state.page == "chat":
+    page_chat()
+elif st.session_state.page == "friends":
+    page_friends()
+elif st.session_state.page == "notifications":
+    page_notifications()
