@@ -1,0 +1,51 @@
+# ============================
+# Zeta Chat App Configuration
+# ============================
+
+[app]
+name = "Zeta Chat"
+version = "1.0.0"
+theme = "dark"
+default_language = "en"
+realtime_updates = true
+
+[database]
+type = "sqlite"
+path = "zetachat.db"
+
+[auth]
+allow_signup = true
+password_min_length = 6
+password_require_special = true
+forgot_password_enabled = true
+
+[features]
+feed = true
+chat = true
+friends = true
+notifications = true
+posts_with_images = true
+
+[features.chat]
+realtime = true
+message_limit = 100
+show_timestamps = true
+allow_attachments = true
+
+[features.feed]
+show_likes = true
+show_comments = true
+show_shares = true
+max_posts_display = 50
+sample_images = [
+    "https://picsum.photos/400/200?random=1",
+    "https://picsum.photos/400/200?random=2",
+    "https://picsum.photos/400/200?random=3",
+    "https://picsum.photos/400/200?random=4"
+]
+
+[ui]
+primary_color = "#1E1E2F"
+secondary_color = "#27293D"
+accent_color = "#5865F2"
+font_family = "Segoe UI, Roboto, Helvetica, Arial, sans-serif"
