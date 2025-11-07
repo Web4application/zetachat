@@ -1,0 +1,70 @@
+/* Discord-inspired Dark Mode */
+body {
+    background-color: #36393f;
+    color: #dcddde;
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4 {
+    color: #ffffff;
+}
+
+.stButton>button {
+    background-color: #7289da;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 0.5em 1em;
+    font-weight: bold;
+    border: none;
+    transition: background 0.2s;
+}
+
+.stButton>button:hover {
+    background-color: #5b6eae;
+}
+
+.stTextInput>div>input, .stTextArea>div>textarea {
+    background-color: #2f3136;
+    color: #dcddde;
+    border-radius: 5px;
+    border: 1px solid #202225;
+    padding: 0.5em;
+}
+
+.stMarkdown, .stText {
+    color: #dcddde;
+}
+
+.stContainer {
+    background-color: #2f3136;
+    border-radius: 10px;
+    padding: 1em;
+    margin-bottom: 1em;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.stSidebar {
+    background-color: #202225;
+    color: #dcddde;
+}
+
+img {
+    border-radius: 10px;
+}
+
+.feed-card {
+    background-color: #2f3136;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+a {
+    color: #00b0f4;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
