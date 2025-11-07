@@ -1,4 +1,3 @@
-# zetachat_pro_v2.py
 import streamlit as st
 import os, time
 from random import randint, choice
