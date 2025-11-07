@@ -1,333 +1,227 @@
 import streamlit as st
-import time
-from random import choice, randint
+import firebase_admin
+from firebase_admin import credentials, firestore, storage
+from dotenv import load_dotenv
 import os
+import time
+from datetime import datetime
+from random import randint, choice
 
-# ======================================================
-# 🎨 Auto-create Discord-style CSS (style.css)
-# ======================================================
-discord_style = """
-/* ===============================
-   Discord-Style Theme for Streamlit
-   =============================== */
+# ===============================================
+# 🌍 Load Environment Variables
+# ===============================================
+load_dotenv()
+FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID")
+FIREBASE_STORAGE_BUCKET = os.getenv("FIREBASE_STORAGE_BUCKET")
 
+# ===============================================
+# 🔥 Firebase Setup
+# ===============================================
+if not firebase_admin._apps:
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app(cred, {"projectId": FIREBASE_PROJECT_ID, "storageBucket": FIREBASE_STORAGE_BUCKET})
+
+db = firestore.client()
+bucket = storage.bucket()
+
+# ===============================================
+# 🎨 Custom ZetaGlow Theme (Unique CSS)
+# ===============================================
+zetaglow_css = """
+<style>
 body {
-    background-color: #2b2d31;
-    color: #dcddde;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top, #121212, #0a0a0a);
+    color: #e0e0e0;
+    font-family: 'Poppins', sans-serif;
 }
-
-/* Streamlit default elements */
-h1, h2, h3, h4, h5, h6 {
-    color: #ffffff;
-}
-
 .stApp {
-    background-color: #2b2d31;
+    background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
 }
-
-/* Sidebar */
-.css-1d391kg, .stSidebar {
-    background-color: #232428 !important;
-    color: #dcddde !important;
-    border-right: 1px solid #202225;
+h1, h2, h3, h4, h5 {
+    color: #00ffe0;
+    text-shadow: 0px 0px 12px rgba(0,255,240,0.4);
 }
-
-.stSidebar h2, .stSidebar h3, .stSidebar h4 {
-    color: #ffffff;
-}
-
-/* Buttons */
 div.stButton > button {
-    background-color: #5865f2;
-    color: white;
+    background: linear-gradient(90deg, #00ffe0, #0077ff);
+    color: black;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 0.5rem 1.2rem;
     font-weight: 600;
-    transition: background-color 0.2s ease-in-out;
+    transition: 0.3s ease-in-out;
 }
 div.stButton > button:hover {
-    background-color: #4752c4;
-    color: white;
+    background: linear-gradient(90deg, #0077ff, #00ffe0);
 }
-
-/* Text Inputs */
-.stTextInput > div > div > input {
-    background-color: #313338;
-    color: #dcddde;
-    border: 1px solid #202225;
+.stTextInput > div > div > input, .stTextArea textarea {
+    background-color: #1c1c1c;
+    color: #00ffe0;
+    border: 1px solid #00ffe0;
     border-radius: 6px;
 }
-.stTextArea textarea {
-    background-color: #313338;
-    color: #dcddde;
-    border-radius: 6px;
-}
-
-/* Feed Card */
 .feed-card {
-    background-color: #313338;
+    background-color: #171717;
     border-radius: 10px;
     padding: 1rem;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    margin-bottom: 1.5rem;
-    transition: transform 0.15s ease;
+    margin: 1rem 0;
+    box-shadow: 0 0 10px rgba(0,255,255,0.1);
+    transition: transform 0.15s;
 }
 .feed-card:hover {
     transform: scale(1.01);
 }
-
-/* Comment Replies */
 .comment-reply {
-    background-color: #2b2d31;
-    color: #b9bbbe;
-    border-left: 3px solid #5865f2;
-    padding: 0.4rem 0.8rem;
-    margin: 0.3rem 0;
-    border-radius: 4px;
-}
-
-/* Inputs inside columns */
-.stColumn input, .stColumn textarea {
-    background-color: #313338;
-    color: #dcddde;
-}
-
-/* Notifications */
-.css-1n76uvr, .stAlert {
-    background-color: #5865f2 !important;
-    color: #fff !important;
-    border: none !important;
-}
-
-/* Friend Requests */
-.sidebar .friend-request {
-    background-color: #202225;
-    border-radius: 6px;
-    padding: 8px;
-    margin-bottom: 5px;
-}
-
-/* Links */
-a {
-    color: #00b0f4;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
-
-/* Scrollbar style */
-::-webkit-scrollbar {
-    width: 10px;
+    background-color: #0e0e0e;
+    border-left: 3px solid #00ffe0;
+    color: #b9b9b9;
+    padding: 0.5rem;
+    border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb {
-    background-color: #5865f2;
-    border-radius: 10px;
+    background: #00ffe0;
+    border-radius: 8px;
 }
-::-webkit-scrollbar-track {
-    background: #202225;
-}
+</style>
 """
+st.markdown(zetaglow_css, unsafe_allow_html=True)
 
-# Create the style file if it doesn't exist
-if not os.path.exists("style.css"):
-    with open("style.css", "w") as f:
-        f.write(discord_style)
+# ===============================================
+# 🧍 User Session Management
+# ===============================================
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-# Load CSS
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-# ======================================================
-# 🧠 Mock Database Setup
-# ======================================================
-if "users" not in st.session_state:
-    st.session_state.users = {
-        "admin": {"password": "password", "avatar": "https://i.pravatar.cc/50?img=1", "bio": "Hello! I'm admin.", "friends": ["user1"], "requests": []},
-        "user1": {"password": "1234", "avatar": "https://i.pravatar.cc/50?img=2", "bio": "I am user1.", "friends": ["admin"], "requests": []}
-    }
-
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
-
-if "posts" not in st.session_state:
-    st.session_state.posts = []
-
-if "notifications" not in st.session_state:
-    st.session_state.notifications = []
-
-sample_images = [
-    "https://picsum.photos/400/200?random=1",
-    "https://picsum.photos/400/200?random=2",
-    "https://picsum.photos/400/200?random=3",
-    "https://picsum.photos/400/200?random=4"
-]
-
-# ======================================================
+# ===============================================
 # 🔐 Authentication
-# ======================================================
-def login(username, password):
-    if username in st.session_state.users and st.session_state.users[username]["password"] == password:
-        st.session_state.current_user = username
-        st.success(f"Logged in as {username}")
-    else:
-        st.error("Invalid username or password")
+# ===============================================
+def login(email, password):
+    users = db.collection("users").where("email", "==", email).get()
+    for u in users:
+        data = u.to_dict()
+        if data["password"] == password:
+            st.session_state.user = data
+            st.success(f"Welcome {data['username']} 👋")
+            return
+    st.error("Invalid credentials!")
 
-def signup(username, password):
-    if username in st.session_state.users:
-        st.error("Username already exists")
-    else:
-        avatar_url = f"https://i.pravatar.cc/50?img={randint(5,70)}"
-        st.session_state.users[username] = {"password": password, "avatar": avatar_url, "bio": "New user bio", "friends": [], "requests": []}
-        st.success("Account created! Please log in.")
+def signup(username, email, password):
+    users = db.collection("users").where("email", "==", email).get()
+    if users:
+        st.error("User already exists!")
+        return
+    user_data = {
+        "username": username,
+        "email": email,
+        "password": password,
+        "bio": "New to ZetaChat 🌍",
+        "avatar": f"https://i.pravatar.cc/150?img={randint(1,70)}",
+        "friends": [],
+        "created": datetime.now().isoformat()
+    }
+    db.collection("users").document(email).set(user_data)
+    st.success("Account created! Please login.")
 
-# ======================================================
-# 🌐 App Layout
-# ======================================================
-st.set_page_config(page_title="Facebook Lite", layout="wide")
-st.title ("ZETA CHAT")
+# ===============================================
+# 🌐 Feed + Chat System
+# ===============================================
+def create_post(user, content, image=None):
+    post = {
+        "user": user["username"],
+        "avatar": user["avatar"],
+        "content": content,
+        "image": image,
+        "likes": 0,
+        "comments": [],
+        "shares": 0,
+        "timestamp": datetime.now().isoformat()
+    }
+    db.collection("posts").add(post)
+    st.success("Post created!")
 
-if st.session_state.current_user is None:
-    st.subheader("Login or Signup")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.text("Login")
-        login_user = st.text_input("Username", key="login_user")
-        login_pass = st.text_input("Password", type="password", key="login_pass")
+def upload_image(file):
+    blob = bucket.blob(f"uploads/{file.name}")
+    blob.upload_from_file(file)
+    blob.make_public()
+    return blob.public_url
+
+def send_message(sender, receiver, message):
+    chat_id = "_".join(sorted([sender, receiver]))
+    msg = {
+        "sender": sender,
+        "receiver": receiver,
+        "message": message,
+        "timestamp": datetime.now().isoformat()
+    }
+    db.collection("chats").document(chat_id).collection("messages").add(msg)
+
+# ===============================================
+# 🏠 App Layout
+# ===============================================
+st.set_page_config(page_title="ZetaChat Cloud", layout="wide")
+st.title("🌌 ZetaChat Cloud")
+
+if not st.session_state.user:
+    st.subheader("Login or Sign Up")
+    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Signup"])
+    with tab1:
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
         if st.button("Login"):
-            login(login_user, login_pass)
-    with col2:
-        st.text("Signup")
-        signup_user = st.text_input("New Username", key="signup_user")
-        signup_pass = st.text_input("New Password", type="password", key="signup_pass")
-        if st.button("Signup"):
-            signup(signup_user, signup_pass)
-
+            login(email, password)
+    with tab2:
+        username = st.text_input("Username")
+        email_new = st.text_input("Email (Signup)")
+        password_new = st.text_input("Password", type="password")
+        if st.button("Create Account"):
+            signup(username, email_new, password_new)
 else:
-    user = st.session_state.users[st.session_state.current_user]
-
-    # Sidebar
-    st.sidebar.header(f"{st.session_state.current_user}'s Profile")
-    st.sidebar.image(user["avatar"])
-    st.sidebar.markdown(f"**Bio:** {user['bio']}")
-
+    user = st.session_state.user
+    st.sidebar.image(user["avatar"], width=80)
+    st.sidebar.markdown(f"**{user['username']}**")
     if st.sidebar.button("Logout"):
-        st.session_state.current_user = None
+        st.session_state.user = None
         st.experimental_rerun()
 
-    st.sidebar.subheader("Notifications")
-    for n in st.session_state.notifications[::-1]:
-        st.sidebar.markdown(f"- {n}")
-    st.sidebar.button("Clear Notifications", on_click=lambda: st.session_state.notifications.clear())
+    st.sidebar.header("Menu")
+    choice_page = st.sidebar.radio("Go to", ["Feed", "Chat", "Profile"])
 
-    st.sidebar.subheader("Friends")
-    for f in user["friends"]:
-        if st.sidebar.button(f"View {f}'s Profile"):
-            st.session_state.view_profile = f
-            st.experimental_rerun()
-
-    st.sidebar.subheader("Friend Requests")
-    if user["requests"]:
-        for req in user["requests"]:
-            col1, col2 = st.sidebar.columns([2, 1])
-            col1.markdown(f"Friend request from **{req}**")
-            if col2.button(f"Accept {req}"):
-                user["friends"].append(req)
-                st.session_state.users[req]["friends"].append(st.session_state.current_user)
-                user["requests"].remove(req)
-                st.session_state.notifications.append(f"You are now friends with {req}")
-                st.experimental_rerun()
-    else:
-        st.sidebar.markdown("No friend requests")
-
-    st.sidebar.subheader("Send Friend Request")
-    potential_friends = [u for u in st.session_state.users if u not in user["friends"] and u != st.session_state.current_user and u not in user["requests"]]
-    new_friend = st.sidebar.selectbox("Select user", [""] + potential_friends)
-    if st.sidebar.button("Send Request") and new_friend:
-        st.session_state.users[new_friend]["requests"].append(st.session_state.current_user)
-        st.sidebar.success(f"Friend request sent to {new_friend}")
-
-    # View Profile
-    view_user = st.session_state.get("view_profile", None)
-    if view_user:
-        view_data = st.session_state.users[view_user]
-        st.subheader(f"{view_user}'s Profile")
-        st.image(view_data["avatar"], width=100)
-        st.markdown(f"**Bio:** {view_data['bio']}")
-        st.markdown("**Posts:**")
-        for post in st.session_state.posts:
-            if post["user"] == view_user:
-                st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
-                st.markdown(f"**{post['user']}**  •  {post['time']}")
-                st.write(post["content"])
-                if post["image"]:
-                    st.image(post["image"])
-                st.markdown(f"**Likes:** {post['likes']}   **Comments:** {len(post['comments'])}   **Shares:** {post['shares']}")
-                for c in post['comments']:
-                    st.markdown(f"<div class='comment-reply'>{c}</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-        if st.button("Back to Feed"):
-            st.session_state.view_profile = None
-            st.experimental_rerun()
-
-    else:
-        # Create Post
-        st.subheader("📣 Create a Post")
-        post_text = st.text_area("What's on your mind?")
-        post_image_url = st.text_input("Image URL (optional)", "")
-
-        if st.button("Post"):
-            if post_text.strip() != "":
-                post = {
-                    "user": st.session_state.current_user,
-                    "avatar": user["avatar"],
-                    "content": post_text,
-                    "image": post_image_url if post_image_url else choice(sample_images),
-                    "likes": 0,
-                    "comments": [],
-                    "shares": 0,
-                    "time": time.strftime("%Y-%m-%d %H:%M:%S")
-                }
-                st.session_state.posts.insert(0, post)
-                st.session_state.notifications.append(f"{st.session_state.current_user} posted a new status!")
-                st.success("Posted!")
-
-        # News Feed
+    if choice_page == "Feed":
         st.subheader("📰 News Feed")
-        for idx, post in enumerate(st.session_state.posts):
-            if post["user"] != st.session_state.current_user and post["user"] not in user["friends"]:
-                continue
-            with st.container():
-                st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
-                col1, col2 = st.columns([1, 5])
-                with col1:
-                    st.image(post["avatar"], width=50)
-                with col2:
-                    st.markdown(f"**{post['user']}**  •  {post['time']}")
-                    st.write(post["content"])
-                    if post["image"]:
-                        st.image(post["image"])
+        content = st.text_area("What's on your mind?")
+        image = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
+        if st.button("Post"):
+            image_url = upload_image(image) if image else None
+            create_post(user, content, image_url)
 
-                col_like, col_comment, col_share = st.columns([1, 2, 1])
-                with col_like:
-                    if st.button(f"👍 Like {idx}"):
-                        st.session_state.posts[idx]['likes'] += 1
-                        st.session_state.notifications.append(f"{st.session_state.current_user} liked {post['user']}'s post!")
-                with col_comment:
-                    comment_input = st.text_input(f"💬 Comment {idx}", key=f"comment_{idx}")
-                    if st.button(f"Add Comment {idx}") and comment_input.strip():
-                        st.session_state.posts[idx]['comments'].append(f"{st.session_state.current_user}: {comment_input}")
-                        st.session_state.notifications.append(f"{st.session_state.current_user} commented on {post['user']}'s post!")
-                with col_share:
-                    if st.button(f"🔁 Share {idx}"):
-                        st.session_state.posts[idx]['shares'] += 1
-                        st.session_state.notifications.append(f"{st.session_state.current_user} shared {post['user']}'s post!")
+        posts = db.collection("posts").order_by("timestamp", direction=firestore.Query.DESCENDING).stream()
+        for p in posts:
+            post = p.to_dict()
+            st.markdown(f"<div class='feed-card'><b>{post['user']}</b><br>{post['content']}</div>", unsafe_allow_html=True)
+            if post.get("image"):
+                st.image(post["image"], use_container_width=True)
 
-                st.markdown(f"**Likes:** {post['likes']}   **Comments:** {len(post['comments'])}   **Shares:** {post['shares']}")
-                for c in post['comments']:
-                    st.markdown(f"<div class='comment-reply'>{c}</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("---")
-                time.sleep(0.05)
+    elif choice_page == "Chat":
+        st.subheader("💬 1-on-1 Chat")
+        users = [u.id for u in db.collection("users").stream() if u.id != user["email"]]
+        chat_with = st.selectbox("Select user", users)
+        msg = st.text_input("Type a message")
+        if st.button("Send"):
+            send_message(user["email"], chat_with, msg)
+            st.success("Sent!")
+
+        st.markdown("---")
+        chat_id = "_".join(sorted([user["email"], chat_with]))
+        messages = db.collection("chats").document(chat_id).collection("messages").order_by("timestamp").stream()
+        for m in messages:
+            data = m.to_dict()
+            align = "right" if data["sender"] == user["email"] else "left"
+            st.markdown(f"<div style='text-align:{align};padding:5px;'>{data['sender']}: {data['message']}</div>", unsafe_allow_html=True)
+
+    elif choice_page == "Profile":
+        st.subheader("👤 Profile")
+        st.image(user["avatar"], width=120)
+        bio = st.text_area("Edit your bio", user["bio"])
+        if st.button("Save Bio"):
+            db.collection("users").document(user["email"]).update({"bio": bio})
+            st.success("Updated!")
