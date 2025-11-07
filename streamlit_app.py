@@ -1,227 +1,268 @@
+# zeta_all_in_one.py
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, firestore, storage
-from dotenv import load_dotenv
+import sqlite3
 import os
-import time
 from datetime import datetime
-from random import randint, choice
+from random import randint
+import time
 
-# ===============================================
-# 🌍 Load Environment Variables
-# ===============================================
-load_dotenv()
-FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
-FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID")
-FIREBASE_STORAGE_BUCKET = os.getenv("FIREBASE_STORAGE_BUCKET")
+# ------------------------------
+# Auto-create uploads folder
+# ------------------------------
+if not os.path.exists("uploads"):
+    os.mkdir("uploads")
 
-# ===============================================
-# 🔥 Firebase Setup
-# ===============================================
-if not firebase_admin._apps:
-    cred = credentials.ApplicationDefault()
-    firebase_admin.initialize_app(cred, {"projectId": FIREBASE_PROJECT_ID, "storageBucket": FIREBASE_STORAGE_BUCKET})
+# ------------------------------
+# SQLite DB (local, single file)
+# ------------------------------
+conn = sqlite3.connect("zeta.db", check_same_thread=False)
+c = conn.cursor()
 
-db = firestore.client()
-bucket = storage.bucket()
+# Users
+c.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password TEXT,
+    avatar TEXT,
+    bio TEXT
+)
+""")
+# Posts
+c.execute("""
+CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user TEXT,
+    content TEXT,
+    image TEXT,
+    likes INTEGER DEFAULT 0,
+    created_at TEXT
+)
+""")
+# Messages
+c.execute("""
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender TEXT,
+    receiver TEXT,
+    content TEXT,
+    created_at TEXT
+)
+""")
+# Friends
+c.execute("""
+CREATE TABLE IF NOT EXISTS friends (
+    user TEXT,
+    friend TEXT,
+    status TEXT
+)
+""")
+# Comments
+c.execute("""
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER,
+    user TEXT,
+    content TEXT,
+    created_at TEXT
+)
+""")
+conn.commit()
 
-# ===============================================
-# 🎨 Custom ZetaGlow Theme (Unique CSS)
-# ===============================================
-zetaglow_css = """
-<style>
-body {
-    background: radial-gradient(circle at top, #121212, #0a0a0a);
-    color: #e0e0e0;
-    font-family: 'Poppins', sans-serif;
-}
-.stApp {
-    background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
-}
-h1, h2, h3, h4, h5 {
-    color: #00ffe0;
-    text-shadow: 0px 0px 12px rgba(0,255,240,0.4);
-}
-div.stButton > button {
-    background: linear-gradient(90deg, #00ffe0, #0077ff);
-    color: black;
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1.2rem;
-    font-weight: 600;
-    transition: 0.3s ease-in-out;
-}
-div.stButton > button:hover {
-    background: linear-gradient(90deg, #0077ff, #00ffe0);
-}
-.stTextInput > div > div > input, .stTextArea textarea {
-    background-color: #1c1c1c;
-    color: #00ffe0;
-    border: 1px solid #00ffe0;
-    border-radius: 6px;
-}
-.feed-card {
-    background-color: #171717;
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 1rem 0;
-    box-shadow: 0 0 10px rgba(0,255,255,0.1);
-    transition: transform 0.15s;
-}
-.feed-card:hover {
-    transform: scale(1.01);
-}
-.comment-reply {
-    background-color: #0e0e0e;
-    border-left: 3px solid #00ffe0;
-    color: #b9b9b9;
-    padding: 0.5rem;
-    border-radius: 5px;
-}
-::-webkit-scrollbar-thumb {
-    background: #00ffe0;
-    border-radius: 8px;
-}
-</style>
+# ------------------------------
+# Dark modern CSS
+# ------------------------------
+dark_css = """
+body, .stApp {background-color:#0d0d0f;color:#eaeaea;font-family:'Inter', sans-serif;}
+button,input,textarea {background:#1e1e22;color:#fff;border-radius:8px;}
+.feed-card {background-color:#1b1b1f;border-radius:10px;padding:1rem;margin-bottom:1rem;box-shadow:0 0 5px rgba(255,255,255,0.05);}
+.comment-reply {background-color:#0d0d12;color:#b9bbbe;border-left:3px solid #8B5CF6;padding:0.4rem 0.8rem;margin:0.3rem 0;border-radius:4px;}
+.glow-avatar {border-radius:50%;border:3px solid #8B5CF6;padding:2px;}
 """
-st.markdown(zetaglow_css, unsafe_allow_html=True)
+st.markdown(f"<style>{dark_css}</style>", unsafe_allow_html=True)
 
-# ===============================================
-# 🧍 User Session Management
-# ===============================================
-if "user" not in st.session_state:
-    st.session_state.user = None
+# ------------------------------
+# Session state
+# ------------------------------
+if "current_user" not in st.session_state: st.session_state.current_user = None
+if "notifications" not in st.session_state: st.session_state.notifications = []
 
-# ===============================================
-# 🔐 Authentication
-# ===============================================
-def login(email, password):
-    users = db.collection("users").where("email", "==", email).get()
-    for u in users:
-        data = u.to_dict()
-        if data["password"] == password:
-            st.session_state.user = data
-            st.success(f"Welcome {data['username']} 👋")
-            return
-    st.error("Invalid credentials!")
+# ------------------------------
+# Auth functions
+# ------------------------------
+def login(username, password):
+    user = c.execute("SELECT * FROM users WHERE username=? AND password=?", (username,password)).fetchone()
+    if user:
+        st.session_state.current_user = username
+        st.success(f"Logged in as {username}")
+    else:
+        st.error("Invalid username or password")
 
-def signup(username, email, password):
-    users = db.collection("users").where("email", "==", email).get()
-    if users:
-        st.error("User already exists!")
-        return
-    user_data = {
-        "username": username,
-        "email": email,
-        "password": password,
-        "bio": "New to ZetaChat 🌍",
-        "avatar": f"https://i.pravatar.cc/150?img={randint(1,70)}",
-        "friends": [],
-        "created": datetime.now().isoformat()
-    }
-    db.collection("users").document(email).set(user_data)
-    st.success("Account created! Please login.")
+def signup(username, password):
+    exists = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+    if exists:
+        st.error("Username already exists")
+    else:
+        avatar = f"https://i.pravatar.cc/50?img={randint(1,70)}"
+        c.execute("INSERT INTO users (username,password,avatar,bio) VALUES (?,?,?,?)",
+                  (username,password,avatar,"Hello! I am new here."))
+        conn.commit()
+        st.success("Account created! Please log in.")
 
-# ===============================================
-# 🌐 Feed + Chat System
-# ===============================================
-def create_post(user, content, image=None):
-    post = {
-        "user": user["username"],
-        "avatar": user["avatar"],
-        "content": content,
-        "image": image,
-        "likes": 0,
-        "comments": [],
-        "shares": 0,
-        "timestamp": datetime.now().isoformat()
-    }
-    db.collection("posts").add(post)
-    st.success("Post created!")
+# ------------------------------
+# App Layout
+# ------------------------------
+st.set_page_config(page_title="Zeta App", layout="wide")
+st.title("💫 Zeta — Full Social Dark Mode (All-in-One)")
 
-def upload_image(file):
-    blob = bucket.blob(f"uploads/{file.name}")
-    blob.upload_from_file(file)
-    blob.make_public()
-    return blob.public_url
+# Auto-refresh for real-time
+st_autorefresh = st.experimental_rerun
+if st.button("Refresh Now"):
+    st.experimental_rerun()
 
-def send_message(sender, receiver, message):
-    chat_id = "_".join(sorted([sender, receiver]))
-    msg = {
-        "sender": sender,
-        "receiver": receiver,
-        "message": message,
-        "timestamp": datetime.now().isoformat()
-    }
-    db.collection("chats").document(chat_id).collection("messages").add(msg)
-
-# ===============================================
-# 🏠 App Layout
-# ===============================================
-st.set_page_config(page_title="ZetaChat Cloud", layout="wide")
-st.title("🌌 ZetaChat Cloud")
-
-if not st.session_state.user:
-    st.subheader("Login or Sign Up")
-    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Signup"])
-    with tab1:
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
+# ---------- LOGIN/SIGNUP ----------
+if st.session_state.current_user is None:
+    col1,col2 = st.columns(2)
+    with col1:
+        st.subheader("Login")
+        login_user = st.text_input("Username", key="login_user")
+        login_pass = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login"):
-            login(email, password)
-    with tab2:
-        username = st.text_input("Username")
-        email_new = st.text_input("Email (Signup)")
-        password_new = st.text_input("Password", type="password")
-        if st.button("Create Account"):
-            signup(username, email_new, password_new)
+            login(login_user, login_pass)
+    with col2:
+        st.subheader("Signup")
+        signup_user = st.text_input("New Username", key="signup_user")
+        signup_pass = st.text_input("New Password", type="password", key="signup_pass")
+        if st.button("Signup"):
+            signup(signup_user, signup_pass)
+
 else:
-    user = st.session_state.user
-    st.sidebar.image(user["avatar"], width=80)
-    st.sidebar.markdown(f"**{user['username']}**")
+    user_data = c.execute("SELECT * FROM users WHERE username=?", (st.session_state.current_user,)).fetchone()
+    st.sidebar.header(f"{st.session_state.current_user}'s Profile")
+    st.sidebar.image(user_data[2], width=100)
+    st.sidebar.markdown(f"**Bio:** {user_data[3]}")
     if st.sidebar.button("Logout"):
-        st.session_state.user = None
+        st.session_state.current_user = None
         st.experimental_rerun()
 
-    st.sidebar.header("Menu")
-    choice_page = st.sidebar.radio("Go to", ["Feed", "Chat", "Profile"])
+    # Tabs
+    tab = st.sidebar.radio("Navigate", ["Feed","Chat","Friends","Profile","Notifications"])
 
-    if choice_page == "Feed":
-        st.subheader("📰 News Feed")
-        content = st.text_area("What's on your mind?")
-        image = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
+    # ------------------- FEED -------------------
+    if tab=="Feed":
+        st.subheader("📣 Create a Post")
+        post_text = st.text_area("What's on your mind?")
+        post_image = st.file_uploader("Upload Image (optional)", type=["png","jpg","jpeg"])
         if st.button("Post"):
-            image_url = upload_image(image) if image else None
-            create_post(user, content, image_url)
+            image_path = ""
+            if post_image:
+                image_path = f"uploads/{post_image.name}"
+                with open(image_path,"wb") as f: f.write(post_image.getbuffer())
+            c.execute("INSERT INTO posts (user,content,image,created_at) VALUES (?,?,?,?)",
+                      (st.session_state.current_user,post_text,image_path,datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            conn.commit()
+            st.success("Posted!")
+            st.experimental_rerun()
 
-        posts = db.collection("posts").order_by("timestamp", direction=firestore.Query.DESCENDING).stream()
+        st.subheader("📰 News Feed")
+        posts = c.execute("SELECT * FROM posts ORDER BY id DESC").fetchall()
         for p in posts:
-            post = p.to_dict()
-            st.markdown(f"<div class='feed-card'><b>{post['user']}</b><br>{post['content']}</div>", unsafe_allow_html=True)
-            if post.get("image"):
-                st.image(post["image"], use_container_width=True)
+            st.markdown("<div class='feed-card'>", unsafe_allow_html=True)
+            st.markdown(f"**{p[1]}**  •  {p[5]}")
+            st.write(p[2])
+            if p[3]: st.image(p[3])
 
-    elif choice_page == "Chat":
-        st.subheader("💬 1-on-1 Chat")
-        users = [u.id for u in db.collection("users").stream() if u.id != user["email"]]
-        chat_with = st.selectbox("Select user", users)
-        msg = st.text_input("Type a message")
-        if st.button("Send"):
-            send_message(user["email"], chat_with, msg)
-            st.success("Sent!")
+            # Likes
+            col_like,col_comment = st.columns([1,3])
+            with col_like:
+                if st.button(f"👍 Like {p[0]}"):
+                    c.execute("UPDATE posts SET likes=likes+1 WHERE id=?", (p[0],))
+                    conn.commit()
+                    st.session_state.notifications.append(f"{st.session_state.current_user} liked {p[1]}'s post")
+                    st.experimental_rerun()
+                st.markdown(f"Likes: {p[4]}")
 
-        st.markdown("---")
-        chat_id = "_".join(sorted([user["email"], chat_with]))
-        messages = db.collection("chats").document(chat_id).collection("messages").order_by("timestamp").stream()
-        for m in messages:
-            data = m.to_dict()
-            align = "right" if data["sender"] == user["email"] else "left"
-            st.markdown(f"<div style='text-align:{align};padding:5px;'>{data['sender']}: {data['message']}</div>", unsafe_allow_html=True)
+            # Comments
+            with col_comment:
+                comments = c.execute("SELECT * FROM comments WHERE post_id=? ORDER BY id ASC", (p[0],)).fetchall()
+                for cm in comments:
+                    st.markdown(f"<div class='comment-reply'><b>{cm[2]}</b>: {cm[3]}</div>", unsafe_allow_html=True)
+                comment_text = st.text_input(f"💬 Comment {p[0]}", key=f"comment_{p[0]}")
+                if st.button(f"Comment {p[0]}") and comment_text.strip():
+                    c.execute("INSERT INTO comments (post_id,user,content,created_at) VALUES (?,?,?,?)",
+                              (p[0], st.session_state.current_user, comment_text, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                    conn.commit()
+                    st.session_state.notifications.append(f"{st.session_state.current_user} commented on {p[1]}'s post")
+                    st.experimental_rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    elif choice_page == "Profile":
+    # ------------------- CHAT -------------------
+    elif tab=="Chat":
+        st.subheader("💬 Direct Messages")
+        users = c.execute("SELECT username FROM users WHERE username!=?", (st.session_state.current_user,)).fetchall()
+        chat_user = st.selectbox("Select user", [""] + [u[0] for u in users])
+        if chat_user:
+            msgs = c.execute("SELECT * FROM messages WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) ORDER BY id ASC",
+                             (st.session_state.current_user,chat_user,chat_user,st.session_state.current_user)).fetchall()
+            for m in msgs:
+                st.markdown(f"**{m[1]} → {m[2]}:** {m[3]}")
+            msg_text = st.text_input("Type message")
+            if st.button("Send Message"):
+                c.execute("INSERT INTO messages (sender,receiver,content,created_at) VALUES (?,?,?,?)",
+                          (st.session_state.current_user,chat_user,msg_text,datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                conn.commit()
+                st.experimental_rerun()
+
+    # ------------------- FRIENDS -------------------
+    elif tab=="Friends":
+        st.subheader("💜 Friends System")
+        all_users = c.execute("SELECT username FROM users WHERE username!=?", (st.session_state.current_user,)).fetchall()
+        all_users = [u[0] for u in all_users]
+        st.markdown("**Friend Requests:**")
+        requests = c.execute("SELECT user FROM friends WHERE friend=? AND status='request'", (st.session_state.current_user,)).fetchall()
+        for r in requests:
+            col1,col2 = st.columns([2,1])
+            col1.markdown(f"{r[0]} wants to be your friend")
+            with col2:
+                if st.button(f"Accept {r[0]}"):
+                    c.execute("UPDATE friends SET status='accepted' WHERE user=? AND friend=?", (r[0],st.session_state.current_user))
+                    c.execute("INSERT INTO friends (user,friend,status) VALUES (?,?,?)", (st.session_state.current_user,r[0],'accepted'))
+                    conn.commit()
+                    st.session_state.notifications.append(f"You are now friends with {r[0]}")
+                    st.experimental_rerun()
+                if st.button(f"Reject {r[0]}"):
+                    c.execute("DELETE FROM friends WHERE user=? AND friend=?", (r[0],st.session_state.current_user))
+                    conn.commit()
+                    st.experimental_rerun()
+
+        st.markdown("**Add Friends:**")
+        for u in all_users:
+            status = c.execute("SELECT * FROM friends WHERE user=? AND friend=?", (st.session_state.current_user,u)).fetchone()
+            if not status:
+                if st.button(f"Add {u}"):
+                    c.execute("INSERT INTO friends (user,friend,status) VALUES (?,?,?)",(st.session_state.current_user,u,'pending'))
+                    c.execute("INSERT INTO friends (user,friend,status) VALUES (?,?,?)",(u,st.session_state.current_user,'request'))
+                    conn.commit()
+                    st.session_state.notifications.append(f"Friend request sent to {u}")
+                    st.experimental_rerun()
+
+        st.markdown("**Your Friends:**")
+        friends = c.execute("SELECT friend FROM friends WHERE user=? AND status='accepted'", (st.session_state.current_user,)).fetchall()
+        st.write([f[0] for f in friends])
+
+    # ------------------- PROFILE -------------------
+    elif tab=="Profile":
         st.subheader("👤 Profile")
-        st.image(user["avatar"], width=120)
-        bio = st.text_area("Edit your bio", user["bio"])
-        if st.button("Save Bio"):
-            db.collection("users").document(user["email"]).update({"bio": bio})
-            st.success("Updated!")
+        st.text_input("Username", value=user_data[0], disabled=True)
+        bio_text = st.text_area("Bio", value=user_data[3])
+        if st.button("Update Bio"):
+            c.execute("UPDATE users SET bio=? WHERE username=?", (bio_text, st.session_state.current_user))
+            conn.commit()
+            st.success("Bio updated!")
+
+    # ------------------- NOTIFICATIONS -------------------
+    elif tab=="Notifications":
+        st.subheader("🔔 Notifications")
+        for n in st.session_state.notifications[::-1]:
+            st.markdown(f"- {n}")
+        if st.button("Clear Notifications"):
+            st.session_state.notifications.clear()
