@@ -1,630 +1,183 @@
 import streamlit as st
 import time
 from random import choice, randint
-import sqlite3
-import toml
 import os
 
-# -------------------------------
-# Load config
-# -------------------------------
-CONFIG_FILE = "config.toml"
-if not os.path.exists(CONFIG_FILE):
-    st.error("Config file not found. Please create config.toml")
-    st.stop()
-
-config = toml.load(CONFIG_FILE)
-
-# -------------------------------
-# Database setup (SQLite for local)
-# -------------------------------
-DB_PATH = config['database']['path']
-conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-c = conn.cursor()
-
-# Users table
-c.execute('''
-CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    password TEXT,
-    avatar TEXT,
-    bio TEXT
-)
-''')
-
-# Messages table
-c.execute('''
-CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender TEXT,
-    receiver TEXT,
-    message TEXT,
-    timestamp TEXT
-)
-''')
-
-# Posts table
-c.execute('''
-CREATE TABLE IF NOT EXISTS posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user TEXT,
-    content TEXT,
-    image TEXT,
-    likes INTEGER,
-    comments TEXT,
-    shares INTEGER,
-    time TEXT
-)
-''')
-conn.commit()
-
-# -------------------------------
-# Mock initial users if empty
-# -------------------------------
-c.execute("SELECT COUNT(*) FROM users")
-if c.fetchone()[0] == 0:
-    users = [
-        ("admin", "password", "https://i.pravatar.cc/50?img=1", "Hello! I'm admin."),
-        ("user1", "1234", "https://i.pravatar.cc/50?img=2", "I am user1.")
-    ]
-    c.executemany("INSERT INTO users VALUES (?,?,?,?)", users)
-    conn.commit()
-
-# -------------------------------
-# Session state
-# -------------------------------
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
-
-if "page" not in st.session_state:
-    st.session_state.page = "login"
-
-# -------------------------------
-# CSS (from config)
-# -------------------------------
-css = f"""
-body {{
-    background-color: {config['ui']['primary_color']};
-    color: #fff;
-    font-family: {config['ui']['font_family']};
-}}
-.stButton>button {{
-    background-color: {config['ui']['accent_color']};
-    color: white;
-    border-radius: 6px;
-    padding: 0.5rem 1.2rem;
-}}
-.stButton>button:hover {{
-    background-color: {config['ui']['secondary_color']};
-}}
-.stTextInput>div>div>input, .stTextArea textarea {{
-    background-color: {config['ui']['secondary_color']};
-    color: white;
-    border-radius: 6px;
-}}
-.feed-card {{
-    background-color: {config['ui']['secondary_color']};
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}}
-.comment-reply {{
-    background-color: {config['ui']['primary_color']};
-    color: #ccc;
-    border-left: 3px solid {config['ui']['accent_color']};
-    padding: 0.3rem 0.6rem;
-    margin: 0.3rem 0;
-    border-radius: 4px;
-}}
+# ======================================================
+# 🎨 Zeta Dark CSS
+# ======================================================
+zeta_dark_css = """
+body { background-color: #1c1f26; color: #e0e0e0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+h1,h2,h3,h4 { color: #ffffff; font-weight: 700; }
+.stSidebar { background-color: #22252d !important; color: #e0e0e0 !important; border-right: 2px solid #2f3136; padding: 1rem; }
+div.stButton > button { background-color: #5a6cff; color: white; border: none; border-radius: 8px; padding: 0.6rem 1.5rem; font-weight: 600; transition: all 0.2s ease-in-out; }
+div.stButton > button:hover { background-color: #4048c0; transform: scale(1.05); }
+.stTextInput > div > div > input, .stTextArea textarea { background-color: #2a2d36; color: #ffffff; border: 1px solid #444753; border-radius: 8px; padding: 0.5rem; }
+.stTextInput > div > div > input:focus, .stTextArea textarea:focus { border: 1px solid #5a6cff; outline: none; }
+.nav-bar { display: flex; justify-content: space-around; background-color: #1f222b; padding: 0.5rem; border-bottom: 2px solid #2f3136; margin-bottom: 1rem; }
+.nav-bar button { background-color: transparent; border: none; color: #e0e0e0; font-weight: 600; padding: 0.5rem 1rem; transition: color 0.2s ease-in-out; cursor: pointer; }
+.nav-bar button:hover { color: #5a6cff; transform: scale(1.05); }
+.feed-card { background-color: #2a2d36; border-radius: 12px; padding: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 1.5rem; transition: transform 0.15s ease; }
+.feed-card:hover { transform: translateY(-2px) scale(1.01); }
+.comment-reply { background-color: #1f222b; color: #c0c0c0; border-left: 3px solid #5a6cff; padding: 0.4rem 0.8rem; margin: 0.3rem 0; border-radius: 6px; }
+.chat-bubble { padding: 0.5rem 1rem; border-radius: 12px; margin: 0.3rem 0; max-width: 70%; }
+.chat-bubble.user { background-color: #5a6cff; color: #ffffff; align-self: flex-end; }
+.chat-bubble.friend { background-color: #3b3f4c; color: #ffffff; align-self: flex-start; }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-thumb { background-color: #5a6cff; border-radius: 10px; }
+::-webkit-scrollbar-track { background: #1c1f26; }
+.friend-request-card { background-color: #2a2d36; border-radius: 10px; padding: 0.6rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+.notification-card { background-color: #2a2d36; border-radius: 8px; padding: 0.6rem; margin-bottom: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 """
-st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+# Save CSS file if it doesn't exist
+if not os.path.exists("zeta_dark.css"):
+    with open("zeta_dark.css", "w") as f:
+        f.write(zeta_dark_css)
+# Load CSS
+with open("zeta_dark.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# -------------------------------
-# Authentication functions
-# -------------------------------
-def login(username, password):
-    c.execute("SELECT password FROM users WHERE username=?", (username,))
-    row = c.fetchone()
-    if row and row[0] == password:
+# ======================================================
+# 🧠 Mock Database
+# ======================================================
+if "users" not in st.session_state:
+    st.session_state.users = {
+        "admin": {"password":"password","avatar":"https://i.pravatar.cc/50?img=1","bio":"Hello! I'm admin.","friends":["user1"],"requests":[]},
+        "user1": {"password":"1234","avatar":"https://i.pravatar.cc/50?img=2","bio":"I am user1.","friends":["admin"],"requests":[]}
+    }
+if "current_user" not in st.session_state: st.session_state.current_user = None
+if "posts" not in st.session_state: st.session_state.posts = []
+if "notifications" not in st.session_state: st.session_state.notifications = []
+if "chats" not in st.session_state: st.session_state.chats = {}
+
+sample_images = ["https://picsum.photos/400/200?random=1","https://picsum.photos/400/200?random=2",
+                 "https://picsum.photos/400/200?random=3","https://picsum.photos/400/200?random=4"]
+
+# ======================================================
+# 🔐 Auth Functions
+# ======================================================
+def login(username,password):
+    if username in st.session_state.users and st.session_state.users[username]["password"] == password:
         st.session_state.current_user = username
-        st.session_state.page = "feed"
-        st.success(f"Welcome {username}")
-    else:
-        st.error("Invalid username or password")
-
-def signup(username, password):
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    if c.fetchone():
-        st.error("Username already exists")
-    else:
-        avatar = f"https://i.pravatar.cc/50?img={randint(3,70)}"
-        bio = "New user bio"
-        c.execute("INSERT INTO users VALUES (?,?,?,?)", (username, password, avatar, bio))
-        conn.commit()
-        st.success("Account created! Please log in.")
-
-# -------------------------------
-# Sidebar navigation
-# -------------------------------
-if st.session_state.current_user:
-    st.sidebar.title("Navigation")
-    if config['features']['feed']:
-        if st.sidebar.button("Feed"):
-            st.session_state.page = "feed"
-    if config['features']['chat']:
-        if st.sidebar.button("Chat"):
-            st.session_state.page = "chat"
-    if config['features']['friends']:
-        if st.sidebar.button("Friends"):
-            st.session_state.page = "friends"
-    if config['features']['notifications']:
-        if st.sidebar.button("Notifications"):
-            st.session_state.page = "notifications"
-    if st.sidebar.button("Logout"):
-        st.session_state.current_user = None
-        st.session_state.page = "login"
-        st.experimental_rerun()
-
-# -------------------------------
-# Pages
-# -------------------------------
-def page_login():
-    st.title(config['app']['name'])
-    st.subheader("Login or Signup")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.text("Login")
-        login_user = st.text_input("Username", key="login_user")
-        login_pass = st.text_input("Password", type="password", key="login_pass")
-        if st.button("Login"):
-            login(login_user, login_pass)
-    with col2:
-        st.text("Signup")
-        signup_user = st.text_input("New Username", key="signup_user")
-        signup_pass = st.text_input("New Password", type="password", key="signup_pass")
-        if st.button("Signup"):
-            signup(signup_user, signup_pass)
-
-def page_feed():
-    st.header("📰 News Feed")
-    c.execute("SELECT * FROM posts ORDER BY id DESC LIMIT ?", (config['features.feed']['max_posts_display'],))
-    posts = c.fetchall()
-    for post in posts:
-        st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
-        st.markdown(f"**{post[1]}**")
-        st.write(post[2])
-        if post[3]:
-            st.image(post[3])
-        st.markdown("</div>", unsafe_allow_html=True)
-
-def page_chat():
-    st.header("💬 Chat")
-    c.execute("SELECT username FROM users WHERE username != ?", (st.session_state.current_user,))
-    other_users = [row[0] for row in c.fetchall()]
-    selected_user = st.selectbox("Select user to chat with", [""] + other_users)
-    if selected_user:
-        msg_input = st.text_input("Your message")
-        if st.button("Send"):
-            if msg_input.strip():
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                c.execute("INSERT INTO messages (sender, receiver, message, timestamp) VALUES (?,?,?,?)",
-                          (st.session_state.current_user, selected_user, msg_input, timestamp))
-                conn.commit()
-                st.success("Message sent!")
-
-        # Display conversation
-        c.execute("""
-        SELECT sender, message, timestamp FROM messages
-        WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?)
-        ORDER BY id ASC
-        """, (st.session_state.current_user, selected_user, selected_user, st.session_state.current_user))
-        conversation = c.fetchall()
-        for m in conversation:
-            align = "right" if m[0] == st.session_state.current_user else "left"
-            st.markdown(f"<div style='text-align:{align};'>{m[0]}: {m[1]} <small>{m[2]}</small></div>", unsafe_allow_html=True)
-
-def page_friends():
-    st.header("👥 Friends")
-    c.execute("SELECT username FROM users WHERE username != ?", (st.session_state.current_user,))
-    users_list = [row[0] for row in c.fetchall()]
-    st.write(users_list)
-
-def page_notifications():
-    st.header("🔔 Notifications")
-    st.info("No real notifications yet (can integrate later).")
-
-# -------------------------------
-# Render page
-# -------------------------------
-if st.session_state.page == "login":
-    page_login()
-elif st.session_state.page == "feed":
-    page_feed()
-elif st.session_state.page == "chat":
-    page_chat()
-elif st.session_state.page == "friends":
-    page_friends()
-elif st.session_state.page == "notifications":
-    page_notifications()
-
-import streamlit as st
-import toml
-import os
-import sqlite3
-import time
-from random import choice, randint
-
-# -------------------- Config --------------------
-CONFIG_FILE = "config.toml"
-config = toml.load(CONFIG_FILE)
-
-# -------------------- CSS --------------------
-if os.path.exists("style.css"):
-    with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-# -------------------- SQLite DB --------------------
-DB_PATH = config['database']['path']
-conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-c = conn.cursor()
-
-# Users table
-c.execute("""CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    password TEXT,
-    avatar TEXT,
-    bio TEXT
-)""")
-# Friends table
-c.execute("""CREATE TABLE IF NOT EXISTS friends (
-    user TEXT,
-    friend TEXT
-)""")
-# Friend requests
-c.execute("""CREATE TABLE IF NOT EXISTS requests (
-    sender TEXT,
-    receiver TEXT
-)""")
-# Posts table
-c.execute("""CREATE TABLE IF NOT EXISTS posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user TEXT,
-    content TEXT,
-    image TEXT,
-    timestamp TEXT
-)""")
-# Messages table
-c.execute("""CREATE TABLE IF NOT EXISTS messages (
-    sender TEXT,
-    receiver TEXT,
-    message TEXT,
-    timestamp TEXT
-)""")
-# Notifications table
-c.execute("""CREATE TABLE IF NOT EXISTS notifications (
-    user TEXT,
-    content TEXT,
-    timestamp TEXT
-)""")
-conn.commit()
-
-# -------------------- Session State --------------------
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
-if "page" not in st.session_state:
-    st.session_state.page = "login"
-
-# -------------------- Auth --------------------
-def login(username, password):
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    if c.fetchone():
-        st.session_state.current_user = username
-        st.session_state.page = "feed"
         st.success(f"Logged in as {username}")
-    else:
-        st.error("Invalid username or password")
+    else: st.error("Invalid username or password")
 
-def signup(username, password):
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    if c.fetchone():
-        st.error("Username already exists")
+def signup(username,password):
+    if username in st.session_state.users: st.error("Username already exists")
     else:
-        avatar_url = f"https://i.pravatar.cc/50?img={randint(1,70)}"
-        c.execute("INSERT INTO users VALUES (?,?,?,?)", (username, password, avatar_url, "New user bio"))
-        conn.commit()
+        avatar_url=f"https://i.pravatar.cc/50?img={randint(5,70)}"
+        st.session_state.users[username] = {"password":password,"avatar":avatar_url,"bio":"New user bio","friends":[],"requests":[]}
         st.success("Account created! Please log in.")
 
-# -------------------- Navigation --------------------
-def nav_buttons():
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
-    with col1:
-        if st.button("📰 Feed"):
-            st.session_state.page = "feed"
-            st.experimental_rerun()
-    with col2:
-        if st.button("💬 Chat"):
-            st.session_state.page = "chat"
-            st.experimental_rerun()
-    with col3:
-        if st.button("👥 Friends"):
-            st.session_state.page = "friends"
-            st.experimental_rerun()
-    with col4:
-        if st.button("🔔 Notifications"):
-            st.session_state.page = "notifications"
-            st.experimental_rerun()
-    st.markdown("---")
-
-# -------------------- App --------------------
-st.set_page_config(page_title=config['app']['name'], layout="wide")
-st.title(config['app']['name'])
+# ======================================================
+# 🌐 Navigation
+# ======================================================
+st.set_page_config(page_title="Zeta Chat", layout="wide")
 
 if st.session_state.current_user is None:
+    st.title("Zeta Chat")
+    page = st.radio("Select Page", ["Login","Signup","Forgot Password"])
+else:
+    page = st.radio("Select Page", ["Feed","Chat","Friends","Notifications","Profile","Logout"])
+
+# ======================================================
+# 🔑 Pages
+# ======================================================
+
+# ---------- Auth Pages ----------
+if page == "Login":
     st.subheader("Login")
     login_user = st.text_input("Username", key="login_user")
     login_pass = st.text_input("Password", type="password", key="login_pass")
-    if st.button("Login"):
-        login(login_user, login_pass)
+    if st.button("Login"): login(login_user, login_pass)
 
+elif page == "Signup":
     st.subheader("Signup")
     signup_user = st.text_input("New Username", key="signup_user")
     signup_pass = st.text_input("New Password", type="password", key="signup_pass")
-    if st.button("Signup"):
-        signup(signup_user, signup_pass)
+    if st.button("Signup"): signup(signup_user, signup_pass)
 
-# -------------------- FEED --------------------
-elif st.session_state.page == "feed":
-    nav_buttons()
-    st.subheader("📰 Feed")
+elif page == "Forgot Password":
+    st.subheader("Forgot Password")
+    st.text("Feature coming soon...")
 
-    # Display posts
-    c.execute("SELECT * FROM posts ORDER BY timestamp DESC LIMIT ?", (config['features']['feed']['max_posts_display'],))
-    posts = c.fetchall()
-    for post in posts:
-        st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
-        st.markdown(f"**{post[1]}**  •  {post[4]}")
-        st.write(post[2])
-        if post[3]:
-            st.image(post[3])
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("---")
-
-    # Create post
+# ---------- Main App ----------
+elif page == "Feed":
+    st.subheader("📰 News Feed")
+    for idx, post in enumerate(st.session_state.posts):
+        with st.container():
+            st.markdown(f"<div class='feed-card'>", unsafe_allow_html=True)
+            col1,col2 = st.columns([1,5])
+            with col1: st.image(post["avatar"],width=50)
+            with col2:
+                st.markdown(f"**{post['user']}**  •  {post['time']}")
+                st.write(post["content"])
+                if post["image"]: st.image(post["image"])
+            st.markdown(f"**Likes:** {post['likes']}   **Comments:** {len(post['comments'])}   **Shares:** {post['shares']}")
+            for c in post['comments']:
+                st.markdown(f"<div class='comment-reply'>{c}</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("---")
+    # Post creation
     st.subheader("Create a Post")
     post_text = st.text_area("What's on your mind?")
-    post_image = st.text_input("Image URL (optional)")
+    post_image_url = st.text_input("Image URL (optional)")
     if st.button("Post"):
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        image = post_image if post_image else f"https://picsum.photos/400/200?random={randint(1,100)}"
-        c.execute("INSERT INTO posts (user, content, image, timestamp) VALUES (?,?,?,?)",
-                  (st.session_state.current_user, post_text, image, timestamp))
-        c.execute("INSERT INTO notifications (user, content, timestamp) VALUES (?,?,?)",
-                  (st.session_state.current_user, f"Posted a new status", timestamp))
-        conn.commit()
-        st.success("Posted!")
-        st.experimental_rerun()
+        if post_text.strip()!="":
+            post = {"user":st.session_state.current_user,"avatar":st.session_state.users[st.session_state.current_user]["avatar"],
+                    "content":post_text,"image":post_image_url if post_image_url else choice(sample_images),
+                    "likes":0,"comments":[],"shares":0,"time":time.strftime("%Y-%m-%d %H:%M:%S")}
+            st.session_state.posts.insert(0,post)
+            st.success("Posted!")
 
-# -------------------- CHAT --------------------
-elif st.session_state.page == "chat":
-    nav_buttons()
+# ---------- Chat ----------
+elif page == "Chat":
     st.subheader("💬 Chat")
-    user_list = [u[0] for u in c.execute("SELECT username FROM users WHERE username != ?", (st.session_state.current_user,)).fetchall()]
-    chat_with = st.selectbox("Select a user to chat with", [""] + user_list)
-
+    chat_with = st.selectbox("Select Friend", [""]+[f for f in st.session_state.users if f!=st.session_state.current_user])
     if chat_with:
-        c.execute("""SELECT sender, message FROM messages 
-                     WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) 
-                     ORDER BY rowid ASC""", 
-                  (st.session_state.current_user, chat_with, chat_with, st.session_state.current_user))
-        messages = c.fetchall()
-        st.markdown("<div style='height:300px;overflow-y:auto;'>", unsafe_allow_html=True)
-        for msg in messages:
-            color = "#ff4b2b" if msg[0]==st.session_state.current_user else "#ffffff"
-            align = "right" if msg[0]==st.session_state.current_user else "left"
-            st.markdown(f"<div style='text-align:{align};color:{color};'>{msg[0]}: {msg[1]}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        new_msg = st.text_input("Type a message", key=f"input_{chat_with}")
-        if st.button("Send", key=f"send_{chat_with}") and new_msg.strip():
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            c.execute("INSERT INTO messages VALUES (?,?,?,?)",
-                      (st.session_state.current_user, chat_with, new_msg, timestamp))
-            c.execute("INSERT INTO notifications VALUES (?,?,?)",
-                      (chat_with, f"New message from {st.session_state.current_user}", timestamp))
-            conn.commit()
+        chat_key = tuple(sorted([st.session_state.current_user, chat_with]))
+        if chat_key not in st.session_state.chats: st.session_state.chats[chat_key] = []
+        chat_messages = st.session_state.chats[chat_key]
+        for msg in chat_messages:
+            st.markdown(f"<div class='chat-bubble {msg['sender']}'>{msg['message']}</div>", unsafe_allow_html=True)
+        new_msg = st.text_input("Type a message")
+        if st.button("Send"):
+            chat_messages.append({"sender":"user","message":new_msg})
             st.experimental_rerun()
 
-# -------------------- FRIENDS --------------------
-elif st.session_state.page == "friends":
-    nav_buttons()
+# ---------- Friends ----------
+elif page == "Friends":
     st.subheader("👥 Friends")
-
-    # List friends
-    friends = [f[0] for f in c.execute("SELECT friend FROM friends WHERE user=?", (st.session_state.current_user,)).fetchall()]
-    st.markdown("**Your Friends:**")
-    for f in friends:
-        st.write(f)
-
-    # Friend requests
-    st.markdown("**Friend Requests:**")
-    requests = [r[0] for r in c.execute("SELECT sender FROM requests WHERE receiver=?", (st.session_state.current_user,)).fetchall()]
-    for req in requests:
-        col1, col2 = st.columns([2,1])
-        col1.write(req)
+    user = st.session_state.users[st.session_state.current_user]
+    for f in user["friends"]:
+        st.markdown(f"- {f}")
+    st.subheader("Friend Requests")
+    for req in user["requests"]:
+        col1,col2 = st.columns([2,1])
+        col1.markdown(f"Friend request from **{req}**")
         if col2.button(f"Accept {req}"):
-            c.execute("INSERT INTO friends VALUES (?,?)", (st.session_state.current_user, req))
-            c.execute("INSERT INTO friends VALUES (?,?)", (req, st.session_state.current_user))
-            c.execute("DELETE FROM requests WHERE sender=? AND receiver=?", (req, st.session_state.current_user))
-            conn.commit()
-            st.experimental_rerun()
+            user["friends"].append(req)
+            st.session_state.users[req]["friends"].append(st.session_state.current_user)
+            user["requests"].remove(req)
+            st.success(f"You are now friends with {req}")
 
-    # Send request
-    st.markdown("**Send Friend Request:**")
-    all_users = [u[0] for u in c.execute("SELECT username FROM users").fetchall()]
-    potential = [u for u in all_users if u != st.session_state.current_user and u not in friends and u not in requests]
-    new_friend = st.selectbox("Select user", [""] + potential)
-    if st.button("Send Request") and new_friend:
-        c.execute("INSERT INTO requests VALUES (?,?)", (st.session_state.current_user, new_friend))
-        conn.commit()
-        st.success(f"Friend request sent to {new_friend}")
-
-# -------------------- NOTIFICATIONS --------------------
-elif st.session_state.page == "notifications":
-    nav_buttons()
+# ---------- Notifications ----------
+elif page == "Notifications":
     st.subheader("🔔 Notifications")
-    c.execute("SELECT content, timestamp FROM notifications WHERE user=? ORDER BY timestamp DESC", (st.session_state.current_user,))
-    notifications = c.fetchall()
-    for n in notifications:
-        st.write(f"{n[1]} - {n[0]}")
-    if st.button("Clear Notifications"):
-        c.execute("DELETE FROM notifications WHERE user=?", (st.session_state.current_user,))
-        conn.commit()
-        st.experimental_rerun()
+    for n in st.session_state.notifications[::-1]:
+        st.markdown(f"<div class='notification-card'>{n}</div>", unsafe_allow_html=True)
 
-/* ===============================
-   Zeta Chat - Dark Mode Modern Theme
-   =============================== */
+# ---------- Profile ----------
+elif page == "Profile":
+    st.subheader(f"{st.session_state.current_user}'s Profile")
+    user = st.session_state.users[st.session_state.current_user]
+    st.image(user["avatar"])
+    st.text_area("Bio", value=user["bio"])
+    st.text("Posts")
+    for post in st.session_state.posts:
+        if post["user"] == st.session_state.current_user: st.write(post["content"])
 
-body {
-    background-color: #1c1f26;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Headers */
-h1, h2, h3, h4 {
-    color: #ffffff;
-    font-weight: 700;
-}
-
-/* Sidebar */
-.stSidebar {
-    background-color: #22252d !important;
-    color: #e0e0e0 !important;
-    border-right: 2px solid #2f3136;
-    padding: 1rem;
-}
-
-/* Buttons */
-div.stButton > button {
-    background-color: #5a6cff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.6rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-}
-div.stButton > button:hover {
-    background-color: #4048c0;
-    transform: scale(1.05);
-}
-
-/* Inputs */
-.stTextInput > div > div > input, .stTextArea textarea {
-    background-color: #2a2d36;
-    color: #ffffff;
-    border: 1px solid #444753;
-    border-radius: 8px;
-    padding: 0.5rem;
-}
-.stTextInput > div > div > input:focus, .stTextArea textarea:focus {
-    border: 1px solid #5a6cff;
-    outline: none;
-}
-
-/* Navigation */
-.nav-bar {
-    display: flex;
-    justify-content: space-around;
-    background-color: #1f222b;
-    padding: 0.5rem;
-    border-bottom: 2px solid #2f3136;
-    margin-bottom: 1rem;
-}
-.nav-bar button {
-    background-color: transparent;
-    border: none;
-    color: #e0e0e0;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    transition: color 0.2s ease-in-out;
-    cursor: pointer;
-}
-.nav-bar button:hover {
-    color: #5a6cff;
-    transform: scale(1.05);
-}
-
-/* Feed Cards */
-.feed-card {
-    background-color: #2a2d36;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    margin-bottom: 1.5rem;
-    transition: transform 0.15s ease;
-}
-.feed-card:hover {
-    transform: translateY(-2px) scale(1.01);
-}
-
-/* Comments */
-.comment-reply {
-    background-color: #1f222b;
-    color: #c0c0c0;
-    border-left: 3px solid #5a6cff;
-    padding: 0.4rem 0.8rem;
-    margin: 0.3rem 0;
-    border-radius: 6px;
-}
-
-/* Chat bubbles */
-.chat-bubble {
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
-    margin: 0.3rem 0;
-    max-width: 70%;
-}
-.chat-bubble.user {
-    background-color: #5a6cff;
-    color: #ffffff;
-    align-self: flex-end;
-}
-.chat-bubble.friend {
-    background-color: #3b3f4c;
-    color: #ffffff;
-    align-self: flex-start;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-::-webkit-scrollbar-thumb {
-    background-color: #5a6cff;
-    border-radius: 10px;
-}
-::-webkit-scrollbar-track {
-    background: #1c1f26;
-}
-
-/* Friend Requests */
-.friend-request-card {
-    background-color: #2a2d36;
-    border-radius: 10px;
-    padding: 0.6rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Notifications */
-.notification-card {
-    background-color: #2a2d36;
-    border-radius: 8px;
-    padding: 0.6rem;
-    margin-bottom: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
+# ---------- Logout ----------
+elif page == "Logout":
+    st.session_state.current_user = None
+    st.experimental_rerun()
