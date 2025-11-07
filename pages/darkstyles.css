@@ -1,0 +1,7 @@
+body { background-color: #18191A; color: #E4E6EB; font-family: 'Segoe UI', sans-serif; }
+.stApp { background-color: #18191A; }
+div.stButton > button { background-color: #3A3B3C; color: #E4E6EB; border-radius: 6px; }
+div.stButton > button:hover { background-color: #4E4F50; }
+.stTextInput > div > div > input, .stTextArea textarea { background-color: #242526; color: #E4E6EB; border-radius: 6px; }
+.feed-card { background-color: #242526; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; }
+.comment-reply { background-color: #18191A; color: #B0B3B8; border-left: 3px solid #3A3B3C; padding: 0.4rem 0.8rem; margin: 0.3rem 0; border-radius: 4px; }
