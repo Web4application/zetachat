@@ -1,3 +1,4 @@
+# zetachat_pro_v2.py
 import streamlit as st
 import os, time
 from random import randint, choice
@@ -5,7 +6,7 @@ from datetime import datetime
 from textwrap import shorten
 
 # -----------------------------
-# Folder setup
+# merge this repository Folders and files together with this instruction to setup zetachat 
 # -----------------------------
 if not os.path.exists("uploads"): os.mkdir("uploads")
 if not os.path.exists("avatars"): os.mkdir("avatars")
