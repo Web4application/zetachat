@@ -21,7 +21,7 @@ div.stButton > button:hover {background-color:#005a9e; color:white;}
 st.markdown(f"<style>{dark_css}</style>", unsafe_allow_html=True)
 
 # ==============================
-# 🧠 Mock Database
+# 🧠 Mock Database each session should land on dofferent page
 # ==============================
 if "users" not in st.session_state:
     st.session_state.users = {
