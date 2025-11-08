@@ -1,4 +1,4 @@
-# Templates
+<Templates>
 
 Raycast provides a variety of templates to kickstart your extension.
 
