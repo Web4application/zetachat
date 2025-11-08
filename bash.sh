@@ -1,3 +1,4 @@
+pip install streamlit-aggrid
 # Step 1: Install dependencies
 pip install streamlit sqlalchemy psycopg2-binary bcrypt python-dotenv pillow
 
