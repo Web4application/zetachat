@@ -7,3 +7,5 @@ SECRET_KEY=your_super_secret_key
 
 # Step 3: Run the app
 streamlit run streamlit_app.py
+
+python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
