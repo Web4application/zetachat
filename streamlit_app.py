@@ -7,6 +7,54 @@ import time
 # ======================================================
 with open("assets/dark_style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Dark mode CSS directly in the app
+dark_css = """
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+}
+
+/* Buttons */
+div.stButton > button {
+    background-color: #1e88e5;
+    color: white;
+    border-radius: 8px;
+}
+div.stButton > button:hover {
+    background-color: #1565c0;
+}
+
+/* Inputs */
+.stTextInput > div > div > input, .stTextArea textarea {
+    background-color: #1c1c1c;
+    color: #e0e0e0;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+/* Feed Cards */
+.feed-card {
+    background-color: #1e1e1e;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+.comment-reply {
+    background-color: #2a2a2a;
+    padding: 0.5rem;
+    border-left: 3px solid #1e88e5;
+    margin: 0.3rem 0;
+    border-radius: 4px;
+}
+"""
+
+# Inject CSS
+st.markdown(f"<style>{dark_css}</style>", unsafe_allow_html=True)
 
 # ======================================================
 # Initialize Session State
