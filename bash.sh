@@ -9,3 +9,5 @@ SECRET_KEY=your_super_secret_key
 streamlit run streamlit_app.py
 
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
+
+python -m twine upload --repository testpypi dist/*
