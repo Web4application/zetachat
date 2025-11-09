@@ -12,3 +12,4 @@ streamlit run streamlit_app.py
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
 
 python -m twine upload --repository testpypi dist/*
+installer -pkg swiftly-1.0.0.pkg -target CurrentUserHomeDirectory
