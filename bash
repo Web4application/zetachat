@@ -1,0 +1,41 @@
+$ npm exec --package yo --package generator-node --call "yo node"
+-a: --all
+--enjoy-by: --before
+-c: --call
+--desc: --description
+-f: --force
+-g: --global
+--iwr: --include-workspace-root
+-L: --location
+-d: --loglevel info
+-s: --loglevel silent
+--silent: --loglevel silent
+--ddd: --loglevel silly
+--dd: --loglevel verbose
+--verbose: --loglevel verbose
+-q: --loglevel warn
+--quiet: --loglevel warn
+-l: --long
+-m: --message
+--local: --no-global
+-n: --no-yes
+--no: --no-yes
+-p: --parseable
+--porcelain: --parseable
+-C: --prefix
+--readonly: --read-only
+--reg: --registry
+-S: --save
+-B: --save-bundle
+-D: --save-dev
+-E: --save-exact
+-O: --save-optional
+-P: --save-prod
+-?: --usage
+-h: --usage
+-H: --usage
+--help: --usage
+-v: --version
+-w: --workspace
+--ws: --workspaces
+-y: --yes
