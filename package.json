@@ -1,0 +1,18 @@
+{
+  "name": "zeta",
+  "title": "zetachat",
+  "description": "comprehensive web application designed to facilitate seamless communication and collaboration.",
+  "icon": "icon.png",
+  "author": "auraecosystem",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["chat", "colaboration", "Communication"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "zeta",
+      "title": "zetachat",
+      "description": "comprehensive web application designed to facilitate seamless communication and collaboration.",
+      "mode": "view"
+    }
+  ]
+}
