@@ -3,7 +3,7 @@ pip install streamlit-aggrid
 pip install streamlit sqlalchemy psycopg2-binary bcrypt python-dotenv pillow
 
 # Step 2: Create .env
-DATABASE_URL=postgresql+psycopg2://youruser:yourpass@localhost:5432/zetachat
+DATABASE_URL=postgresql+psycopg2://youruser:yourpass@localhost:5959/zetachat
 SECRET_KEY=your_super_secret_key
 
 # Step 3: Run the app
@@ -13,3 +13,9 @@ python -m pip install --index-url https://test.pypi.org/simple/ --no-deps exampl
 
 python -m twine upload --repository testpypi dist/*
 installer -pkg swiftly-1.0.0.pkg -target CurrentUserHomeDirectory
+git clone \
+  git@github.com:geldata/quickstart-nextjs.git \
+  flashcards
+  cd flashcards
+  npm install
+  npx gel project init
