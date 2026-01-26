@@ -1,4 +1,4 @@
-$ npm exec --package yo --package generator-node --call "yo node"
+npm exec --package yo --package generator-node --call "yo node"
 -a: --all
 --enjoy-by: --before
 -c: --call
@@ -39,3 +39,4 @@ $ npm exec --package yo --package generator-node --call "yo node"
 -w: --workspace
 --ws: --workspaces
 -y: --yes
+.vercel/ vetcel link
