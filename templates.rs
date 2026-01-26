@@ -11,7 +11,6 @@ Raycast provides 3 types of templates:
 ## Commands
 
 ### Show Detail
-
 <details>
 
 <summary>Renders a simple Hello World from a markdown string.</summary>
