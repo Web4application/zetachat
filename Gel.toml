@@ -1,0 +1,5 @@
+[instance]
+server-version = "6.11"
+
+[hooks]
+schema.update.after = "npx @gel/generate edgeql-js"
