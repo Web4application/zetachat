@@ -3,7 +3,7 @@ pip install streamlit-aggrid
 pip install streamlit sqlalchemy psycopg2-binary bcrypt python-dotenv pillow
 
 # Step 2: Create .env
-DATABASE_URL=postgresql+psycopg2://youruser:yourpass@localhost:5959/zetachat
+DATABASE_URL=postgresql+psycopg2://youruser:uPCBtcs6oOEqDnT@135.148.150.32:3000/zetachat
 SECRET_KEY=your_super_secret_key
 
 # Step 3: Run the app
