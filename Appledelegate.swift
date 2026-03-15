@@ -13,7 +13,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct YourApp: App {
+struct zetachat: App {
     // Attach AppDelegate for Firebase configuration
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
@@ -29,7 +29,7 @@ struct YourApp: App {
 // Ensure the ContentView is defined
 struct ContentView: View {
     var body: some View {
-        Text("Hello, Firebase!")
+        Text("Hello, world!")
             .padding()
     }
 }
