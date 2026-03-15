@@ -127,4 +127,57 @@ function animate() {
 
   requestAnimationFrame(animate);
 }
+const aCanvas = document.getElementById('avatar-canvas');
+const aCtx = aCanvas.getContext('2d');
+aCanvas.width = aCanvas.height = 200;
+
+let audioSource, analyser, dataArray;
+
+async function initVoice() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioContext = new AudioContext();
+    audioSource = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    
+    audioSource.connect(analyser);
+    analyser.fftSize = 64;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    
+    document.getElementById('link-status').innerText = "ONLINE";
+    drawAvatar();
+  } catch (err) {
+    console.log("Mic access denied");
+  }
+}
+
+function drawAvatar() {
+  requestAnimationFrame(drawAvatar);
+  analyser.getByteFrequencyData(dataArray);
+  
+  // Calculate "Volume" (average of frequencies)
+  const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+  const radius = 40 + (volume / 2); // Pulse size based on volume
+
+  aCtx.clearRect(0, 0, 200, 200);
+  
+  // Draw Pulsing Neural Core
+  aCtx.beginPath();
+  aCtx.arc(100, 100, radius, 0, Math.PI * 2);
+  aCtx.strokeStyle = volume > 50 ? '#bc13fe' : '#00f2ff'; // Glitch color change
+  aCtx.lineWidth = 2;
+  aCtx.stroke();
+
+  // Artificial Glitch: Draw random lines when volume is high
+  if (volume > 60) {
+    aCtx.beginPath();
+    aCtx.moveTo(Math.random() * 200, Math.random() * 200);
+    aCtx.lineTo(Math.random() * 200, Math.random() * 200);
+    aCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    aCtx.stroke();
+  }
+}
+
+// Start the link on first click (browser security requirement)
+window.onclick = () => { if(!audioSource) initVoice(); };
 
