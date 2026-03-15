@@ -1,0 +1,46 @@
+:root {
+  --neon: #00f2ff;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+
+body {
+  margin: 0;
+  background: #000;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+canvas {
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 1;
+}
+
+#matrix-canvas { opacity: 0.2; } /* Subtile data rain */
+#stars-canvas { opacity: 0.5; }  /* Brighter stars */
+
+#app {
+  position: relative;
+  z-index: 10;
+  width: 80vw;
+  height: 75vh;
+  background: var(--glass);
+  backdrop-filter: blur(25px); /* Frosted glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+}
+
+.msg {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 15px;
+  color: #fff;
+  margin-bottom: 10px;
+  border-left: 2px solid var(--neon);
+}
