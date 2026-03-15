@@ -1,4 +1,6 @@
+# Step 1: Install dependencies
 pip install streamlit-aggrid
+quickstart-nextjs
 # Step 1: Install dependencies
 pip install streamlit sqlalchemy psycopg2-binary bcrypt python-dotenv pillow
 
@@ -12,10 +14,11 @@ streamlit run streamlit_app.py
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
 
 python -m twine upload --repository testpypi dist/*
-installer -pkg swiftly-1.0.0.pkg -target CurrentUserHomeDirectory
-git clone \
-  git@github.com:geldata/quickstart-nextjs.git \
-  flashcards
+installer -pkg swiftly-2.0.0.pkg -target CurrentUserHomeDirectory
+git clone git@github.com:geldata/quickstart-nextjs.git\flashcards
   cd flashcards
+  cd quickstart-nextjs.git
+  git clone https://github.com/Web4application/zetachat.git
+ cd zetachat.git
   npm install
   npx gel project init
