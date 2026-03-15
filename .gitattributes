@@ -45,3 +45,33 @@ Dockerfile text
 
 # Exclude documentation or setup files from GitHub statistics if needed
 # docs/* linguist-documentation
+# --- Standard Text Handling ---
+* text=auto eol=lf
+*.js      text
+*.jsx     text
+*.ts      text
+*.tsx     text
+*.py      text
+*.json    text
+*.html    text
+*.css     text
+
+# --- Git LFS Tracking (Large/Binary Assets) ---
+# These files will be stored outside the main Git history to keep the repo fast
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.gz  filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+
+# Image assets handled by LFS
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.ico filter=lfs diff=lfs merge=lfs -text
+
+# Fonts
+*.ttf   filter=lfs diff=lfs merge=lfs -text
+*.woff  filter=lfs diff=lfs merge=lfs -text
+*.woff2 filter=lfs diff=lfs merge=lfs -text
