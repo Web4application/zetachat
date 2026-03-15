@@ -1,3 +1,9 @@
+pipreqs . --force
+pip install pipreqs
+pip install -r requirements.txt
+pip install pipreqs
+pipreqs .
+
 # Step 1: Install dependencies
 pip install streamlit-aggrid
 quickstart-nextjs
@@ -17,6 +23,7 @@ SECRET_KEY=your_super_secret_key
 # Step 3: Run the app
 streamlit git push origin main
 run streamlit_app.py
+pip freeze > requirements.txt
 
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
 
