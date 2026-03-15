@@ -1,0 +1,2 @@
+git add --renormalize .
+git commit -m "Normalize line endings"
