@@ -24,7 +24,8 @@ To get started with the development or deployment of ZetaChat, follow these step
 
 1. **Clone the Repository**
     ```sh
-    git clone https://github.com/Web4application/zetachat.git
+    git clone @github.com/Web4application/zetachat.git
+   cd zetachat
     ```
 
 2. **Install Dependencies**
@@ -32,16 +33,18 @@ To get started with the development or deployment of ZetaChat, follow these step
     ```sh
     cd zetachat
     npm install
+    npx exec
     ```
 
 3. **Run the Application**
     Start the development server.
     ```sh
     npm start
+    "yo node"
     ```
 
 4. **Access the Application**
-    Open your web browser and go to `http://localhost:3000` to view the application.
+    Open your web browser and go to `http://127.0.0.1:3000` to view the application.
 
 ## Contributing
 
