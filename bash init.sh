@@ -1,15 +1,22 @@
 # Step 1: Install dependencies
 pip install streamlit-aggrid
 quickstart-nextjs
+git lfs install
+git add file.psd
+git commit -m "Add design file"
+git push origin main
 # Step 1: Install dependencies
 pip install streamlit sqlalchemy psycopg2-binary bcrypt python-dotenv pillow
+git add .gitattributes
+git commit -m "Set up .gitattributes and Git LFS"
 
 # Step 2: Create .env
 DATABASE_URL=postgresql+psycopg2://youruser:uPCBtcs6oOEqDnT@135.148.150.32:3000/zetachat
 SECRET_KEY=your_super_secret_key
 
 # Step 3: Run the app
-streamlit run streamlit_app.py
+streamlit git push origin main
+run streamlit_app.py
 
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-pkg-zetachat
 
