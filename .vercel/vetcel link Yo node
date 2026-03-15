@@ -17,7 +17,7 @@ npm exec --package yo --package generator-node --call "yo node"
 --quiet: --loglevel warn
 -l: --long
 -m: --message
---local: --no-global
+--local: --global
 -n: --no-yes
 --no: --no-yes
 -p: --parseable
@@ -39,4 +39,4 @@ npm exec --package yo --package generator-node --call "yo node"
 -w: --workspace
 --ws: --workspaces
 -y: --yes
-.vercel/ vetcel link
+.vercel/vetcel link
