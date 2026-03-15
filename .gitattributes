@@ -1,0 +1,47 @@
+# Handle line endings automatically for text files
+# Force them to LF (Linux/macOS style) on check-in
+* text=auto eol=lf
+
+# ----------------------------------------------------------------B
+# Language-Specific Text Handling
+# ----------------------------------------------------------------
+
+# Web and Logic
+*.js      text
+*.jsx     text
+*.ts      text
+*.tsx     text
+*.json    text
+*.py      text
+*.html    text
+*.css     text
+*.scss    text
+*.md      text
+
+# Config and Shell
+*.yml     text
+*.yaml    text
+*.sh      text
+*.env     text
+Dockerfile text
+
+# ----------------------------------------------------------------
+# Binary Files (Ensure Git doesn't try to fix line endings here)
+# ----------------------------------------------------------------
+
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.svg     text
+*.pdf     binary
+*.woff    binary
+*.woff2   binary
+
+# ----------------------------------------------------------------
+# Repository Maintenance
+# ----------------------------------------------------------------
+
+# Exclude documentation or setup files from GitHub statistics if needed
+# docs/* linguist-documentation
