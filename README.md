@@ -44,7 +44,7 @@ To get started with the development or deployment of ZetaChat, follow these step
     ```
 
 4. **Access the Application**
-    Open your web browser and go to `http://127.0.0.1:3000` to view the application.
+    Open your web browser and go to `http://127.0.0.1:5000` to view the application.
 
 ## Contributing
 
