@@ -1,101 +1,77 @@
 :root {
-  --neon-cyan: #00f2ff;
-  --neon-purple: #bc13fe;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --neon-glow: #00f2ff;
+  --glass: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.1);
 }
 
 body {
   margin: 0;
   height: 100vh;
-  background: radial-gradient(circle at top right, #1a1a2e, #0f0f1a, #000000);
-  font-family: 'Orbitron', sans-serif; /* Futuristic font */
-  color: #e0e0e0;
+  background: #050505; /* Deep space black */
+  /* Add a subtle moving aurora background */
+  background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050505 100%);
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
 }
 
-/* The Main Chat Orb/Container */
-.glass-container {
+#app {
   width: 90vw;
   height: 85vh;
-  background: var(--glass-bg);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 40px;
+  background: var(--glass);
+  backdrop-filter: blur(40px); /* The "Frosted" effect */
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--border);
+  border-radius: 50px; /* Highly rounded, organic shape */
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.05);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  padding: 40px;
   position: relative;
 }
 
-/* Floating Messages */
-.chat-window {
-  flex-grow: 1;
-  padding: 40px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
+/* Futuristic Message Bubbles */
 .message {
-  max-width: 60%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
   padding: 15px 25px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  background: rgba(255, 255, 255, 0.03);
-  border-left: 3px solid var(--neon-cyan);
-  animation: slideIn 0.4s ease-out;
+  border-radius: 20px 20px 20px 0px;
+  margin-bottom: 20px;
+  max-width: 70%;
+  color: #fff;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-.message.user {
-  align-self: flex-end;
-  border-left: none;
-  border-right: 3px solid var(--neon-purple);
-  background: rgba(188, 19, 254, 0.05);
-}
-
-/* Transparent Input Floating at the Bottom */
-.input-area {
-  padding: 30px;
+/* Floating Input field */
+.input-container {
+  margin-top: auto;
   display: flex;
-  gap: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 100px;
+  padding: 10px;
+  border: 1px solid var(--border);
 }
 
 input {
-  flex-grow: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  border-radius: 50px;
+  flex: 1;
+  background: transparent;
+  border: none;
   padding: 15px 25px;
   color: white;
   outline: none;
-  transition: 0.3s;
-}
-
-input:focus {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+  font-size: 1rem;
 }
 
 button {
-  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+  background: var(--neon-glow);
   border: none;
   border-radius: 50px;
-  padding: 0 30px;
-  color: white;
+  padding: 10px 30px;
   font-weight: bold;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  box-shadow: 0 0 15px var(--neon-glow);
 }
