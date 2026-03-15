@@ -40,3 +40,4 @@ npm exec --package yo --package generator-node --call "yo node"
 --ws: --workspaces
 -y: --yes
 .vercel/vetcel link
+uvx --from cookiecutter cookiecutter gh:streamlit/component-template --directory cookiecutter/v2
