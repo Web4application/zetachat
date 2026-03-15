@@ -78,4 +78,53 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
+// Audio Context for Futuristic Sounds
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playGlitch() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(Math.random() * 400 + 50, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function playSynthHum() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 110; // Low frequency hum
+  gain.gain.value = 0.05;
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  return { stop: () => osc.stop() };
+}
+
+// Track User Section
+let activeSection = 'stars'; // Default
+document.querySelector('.chat-window').onmouseenter = () => {
+  activeSection = 'matrix';
+  playGlitch();
+};
+document.querySelector('.input-area').onmouseenter = () => {
+  activeSection = 'stars';
+};
+
+// Modified Animate Loop
+function animate() {
+  // If in Chat section, Matrix rain speeds up
+  const matrixSpeed = activeSection === 'matrix' ? 2 : 0.5;
+  
+  // (Your previous Matrix & Star drawing code goes here)
+  // Just multiply the drop increment by matrixSpeed
+  drops.forEach((y, i) => {
+    // ... drawing logic ...
+    drops[i] += matrixSpeed;
+  });
+
+  requestAnimationFrame(animate);
+}
 
