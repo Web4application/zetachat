@@ -180,4 +180,51 @@ function drawAvatar() {
 
 // Start the link on first click (browser security requirement)
 window.onclick = () => { if(!audioSource) initVoice(); };
+const chars = "!<>-_\\/[]{}—=+*^?#________";
+
+function scrambleText(element, finalMessage) {
+  let iteration = 0;
+  const interval = setInterval(() => {
+    element.innerText = finalMessage
+      .split("")
+      .map((letter, index) => {
+        if (index < iteration) return finalMessage[index];
+        return chars[Math.floor(Math.random() * chars.length)];
+      })
+      .join("");
+
+    if (iteration >= finalMessage.length) {
+      clearInterval(interval);
+    }
+    iteration += 1 / 3; // Controls speed of "decoding"
+  }, 30);
+}
+
+// Example usage when a message arrives:
+// const msgDiv = document.createElement('div');
+// chat.appendChild(msgDiv);
+// scrambleText(msgDiv, "SECURE PACKET RECEIVED");
+function decodeMessage(element, finalMessage) {
+  // 1. Prepare for glitch: set data-text attribute for CSS pseudo-elements
+  element.setAttribute('data-text', finalMessage);
+  element.classList.add('glitching'); // Start visual glitch
+  
+  let iteration = 0;
+  const interval = setInterval(() => {
+    element.innerText = finalMessage
+      .split("")
+      .map((letter, index) => {
+        if (index < iteration) return finalMessage[index];
+        return chars[Math.floor(Math.random() * chars.length)];
+      })
+      .join("");
+
+    if (iteration >= finalMessage.length) {
+      clearInterval(interval);
+      element.classList.remove('glitching'); // 2. Stop glitch when decoded
+      playGlitch(); // Optional: Final audio 'click'
+    }
+    iteration += 1 / 3;
+  }, 40);
+}
 
