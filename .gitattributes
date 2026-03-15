@@ -1,7 +1,10 @@
 # Handle line endings automatically for text files
 # Force them to LF (Linux/macOS style) on check-in
 * text=auto eol=lf
+# Force consistent line endings for your code
+* text=auto eol=lf
 
+# 2. Track large assets with 
 # ----------------------------------------------------------------B
 # Language-Specific Text Handling
 # ----------------------------------------------------------------
@@ -75,3 +78,8 @@ Dockerfile text
 *.ttf   filter=lfs diff=lfs merge=lfs -text
 *.woff  filter=lfs diff=lfs merge=lfs -text
 *.woff2 filter=lfs diff=lfs merge=lfs -text
+
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
