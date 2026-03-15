@@ -1,6 +1,26 @@
+flask==3.0.0          # Popular web framework for Python
+gunicorn==21.2.0       # Required for production hosting (like Railway/Render)
+python-dotenv==1.0.0   # To manage secret API keys safely
+flask-socketio==5.3.6  # For real-time messaging
+requests==2.31.0       # To make API calls
 streamlit
 firebase-admin
 pyrebase4
 python-dotenv
 requests
 Pillow
+# Web Framework
+flask==3.0.0
+
+# Real-time Messaging
+flask-socketio==5.3.6
+
+# Production Server (Required for Railway/Render)
+gunicorn==21.2.0
+
+# Database & Security
+flask-sqlalchemy==3.1.1
+python-dotenv==1.0.0
+
+# API & Networking
+requests==2.31.0
