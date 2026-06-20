@@ -1,35 +1,67 @@
 import SwiftUI
 import FirebaseCore
 
-// Custom AppDelegate to handle Firebase initialization
-class AppDelegate: NSObject, UIApplicationDelegate {
+// MARK: - App Delegate
+
+final class AppDelegate: NSObject, UIApplicationDelegate {
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+
         FirebaseApp.configure()
+
+        print("Firebase initialized successfully")
+
         return true
     }
 }
 
+// MARK: - Main App
+
 @main
-struct zetachat: App {
-    // Attach AppDelegate for Firebase configuration
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+struct ZetaChatApp: App {
+
+    @UIApplicationDelegateAdaptor(AppDelegate.self)
+    var appDelegate
 
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                ContentView()
-            }
+            RootView()
         }
     }
 }
 
-// Ensure the ContentView is defined
-struct ContentView: View {
+// MARK: - Root View
+
+struct RootView: View {
+
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        NavigationStack {
+            ContentView()
+        }
+    }
+}
+
+// MARK: - Content View
+
+struct ContentView: View {
+
+    var body: some View {
+        VStack(spacing: 20) {
+
+            Image(systemName: "message.fill")
+                .font(.system(size: 60))
+
+            Text("Welcome to ZetaChat")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text("Firebase Connected")
+                .foregroundStyle(.secondary)
+
+        }
+        .padding()
     }
 }
