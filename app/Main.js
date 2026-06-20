@@ -106,7 +106,7 @@ function playSynthHum() {
 // Track User Section
 let activeSection = 'stars'; // Default
 document.querySelector('.chat-window').onmouseenter = () => {
-  activeSection = 'matrix';
+  activeSection = 'webapp';
   playGlitch();
 };
 document.querySelector('.input-area').onmouseenter = () => {
@@ -226,5 +226,5 @@ function decodeMessage(element, finalMessage) {
     }
     iteration += 1 / 3;
   }, 40);
-}
+};
 
