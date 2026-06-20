@@ -13,6 +13,31 @@ Crypto.cxx    // Crypto implementation
 
 AIBridge.mm   // Swift ↔ C++ bridge
 ```
+ZetaChat
+```fs
+├── Frontend (React/Vite)
+├── Backend (FastAPI)
+├── WebSocket Gateway
+├── MCP Hub
+│   ├── GitHub MCP
+│   ├── Firebase MCP
+│   ├── PostgreSQL MCP
+│   └── Filesystem MCP
+├── AI Layer
+│   ├── Lola
+│   ├── Aura
+│   └── Agent System
+├── Voice Layer
+│   ├── STT
+│   ├── TTS
+│   └── Voice Chat
+├── Blockchain Layer
+│   ├── Fadaka
+│   └── Web4ID
+└── Mobile Apps
+    ├── SwiftUI
+    └── Android
+```
 ## Technologies Used
 
 - **JavaScript**: Primary language for front-end development, enabling interactive and dynamic user interfaces.
