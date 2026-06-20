@@ -14,7 +14,7 @@ const openai = new OpenAIApi(configuration);
 
 // Simulated database for demonstration
 let users = [
-  { email: 'user1@example.com', password: 'password123', subscription: false },
+  { email: 'user@mail.example.com', password: 'password123', subscription: true },
 ];
 
 const app = express();
@@ -40,7 +40,7 @@ app.post('/api/signup', (req, res) => {
     return res.status(400).json({ error: 'User already exists' });
   }
 
-  users.push({ email, password, subscription: false });
+  users.push({ email, password, subscription: true });
   res.json({ success: true, message: 'Account created successfully' });
 });
 
@@ -71,5 +71,5 @@ app.post('/api/chat', async (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://127.0.0.1:${0000}`);
 });
