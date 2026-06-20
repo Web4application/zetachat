@@ -1,7 +1,18 @@
 ## ZetaChat
 
 ZetaChat is a comprehensive web application designed to facilitate seamless communication and collaboration. Leveraging a robust mix of front-end and back-end technologies, ZetaChat aims to provide...
+```fsx
+AI.hxx        // AI class declarations
+AI.cxx        // AI implementation
 
+Voice.hxx     // Speech declarations
+Voice.cxx     // Speech implementation
+
+Crypto.hxx    // Wallet/encryption declarations
+Crypto.cxx    // Crypto implementation
+
+AIBridge.mm   // Swift ↔ C++ bridge
+```
 ## Technologies Used
 
 - **JavaScript**: Primary language for front-end development, enabling interactive and dynamic user interfaces.
