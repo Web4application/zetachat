@@ -32,6 +32,10 @@ if (mode !== "export") {
         source: "/sharegpt",
         destination: "https://sharegpt.com/api/conversations",
       },
+      {
+        source: "/workGpt",
+        destination: "https://workgpt.com/api/conversations",
+      },
     ];
 
     return {
