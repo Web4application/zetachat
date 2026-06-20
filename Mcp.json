@@ -1,0 +1,12 @@
+{
+  "name": "get_user",
+  "description": "Retrieve user information",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  }
+}
